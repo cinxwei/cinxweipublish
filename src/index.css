@@ -1,0 +1,512 @@
+/* ------------------------------------------------------------------ */
+/* palette                                                             */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --accent: #c41e3a;
+
+  /* dark (night) — default */
+  --bg: #120f0e;
+  --ink: #f2ebdd;
+  --ink-dim: rgba(242, 235, 221, 0.45);
+  --star: #fdfaf2;
+  --star-glow: rgba(253, 250, 242, 0.9);
+  --star-halo: rgba(242, 235, 221, 0.4);
+  --content-glow: rgba(255, 200, 150, 0.9);
+  --line: rgba(196, 30, 58, 0.4);
+  --line-soft: rgba(196, 30, 58, 0.6);
+  --line-bright: rgba(196, 30, 58, 0.85);
+  --card-bg: #181413;
+  --backdrop: rgba(10, 8, 7, 0.6);
+}
+
+[data-theme="light"] {
+  --bg: #f2ebdd;
+  --ink: #292019;
+  --ink-dim: rgba(41, 32, 25, 0.5);
+  /* stars stay white in daylight — they read against the cream through glow */
+  --star: #ffffff;
+  --star-glow: rgba(255, 255, 255, 0.95);
+  --star-halo: rgba(196, 30, 58, 0.5);
+  --content-glow: rgba(196, 30, 58, 0.75);
+  --line: rgba(196, 30, 58, 0.45);
+  --line-soft: rgba(196, 30, 58, 0.65);
+  --line-bright: rgba(196, 30, 58, 0.9);
+  --card-bg: #faf5ea;
+  --backdrop: rgba(242, 235, 221, 0.55);
+}
+
+/* ------------------------------------------------------------------ */
+/* base                                                                */
+/* ------------------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    serif;
+  overflow: hidden;
+  transition: background 0.6s ease, color 0.6s ease;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ---- day: creamy, pearlescent, openly iridescent ------------------ */
+
+[data-theme="light"] .sky {
+  background:
+    radial-gradient(100vmax 70vmax at 15% 5%, rgba(255, 190, 215, 0.5), transparent 55%),
+    radial-gradient(90vmax 80vmax at 88% 18%, rgba(180, 212, 255, 0.45), transparent 55%),
+    radial-gradient(85vmax 85vmax at 55% 95%, rgba(255, 228, 160, 0.5), transparent 50%),
+    radial-gradient(70vmax 70vmax at 32% 60%, rgba(196, 245, 220, 0.4), transparent 50%),
+    radial-gradient(60vmax 60vmax at 72% 45%, rgba(225, 195, 255, 0.35), transparent 50%),
+    var(--bg);
+}
+
+[data-theme="light"] .sky::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 170, 200, 0.22),
+    rgba(170, 205, 255, 0.22),
+    rgba(255, 230, 150, 0.22),
+    rgba(180, 245, 210, 0.18),
+    rgba(215, 180, 255, 0.2),
+    rgba(255, 170, 200, 0.22)
+  );
+  filter: blur(50px);
+  animation: sheen 75s linear infinite;
+  pointer-events: none;
+}
+
+/* ---- night: the same iridescence, turned down into the dark ------- */
+
+[data-theme="dark"] .sky {
+  background:
+    radial-gradient(100vmax 70vmax at 15% 5%, rgba(88, 28, 135, 0.16), transparent 55%),
+    radial-gradient(90vmax 80vmax at 88% 18%, rgba(12, 74, 110, 0.16), transparent 55%),
+    radial-gradient(85vmax 85vmax at 55% 95%, rgba(120, 30, 50, 0.14), transparent 50%),
+    radial-gradient(70vmax 70vmax at 32% 60%, rgba(13, 90, 80, 0.1), transparent 50%),
+    var(--bg);
+}
+
+[data-theme="dark"] .sky::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(120, 40, 160, 0.1),
+    rgba(20, 90, 140, 0.1),
+    rgba(160, 40, 70, 0.09),
+    rgba(15, 110, 95, 0.08),
+    rgba(120, 40, 160, 0.1)
+  );
+  filter: blur(60px);
+  animation: sheen 110s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes sheen {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* masthead + theme toggle + admin                                     */
+/* ------------------------------------------------------------------ */
+
+.masthead {
+  position: absolute;
+  top: 2rem;
+  left: 2.25rem;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.masthead h1 {
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+
+.masthead h1::after {
+  content: "";
+  display: block;
+  width: 1.6rem;
+  height: 1px;
+  margin-top: 0.5rem;
+  background: var(--accent);
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 2rem;
+  right: 2.25rem;
+  z-index: 5;
+  background: none;
+  border: none;
+  padding: 0.3rem 0.1rem;
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+
+.admin-badge {
+  position: absolute;
+  top: 2.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 0.68rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(196, 30, 58, 0.4);
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* constellations                                                      */
+/* ------------------------------------------------------------------ */
+
+.constellation {
+  position: absolute;
+  /* horizontal position is driven every frame from JS (shared sky scroll)
+     as a translate3d; top/width/height come from entry.field */
+  will-change: transform;
+}
+
+.constellation-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transition: transform 0.7s ease;
+}
+
+/* soft reaction when the cursor passes anywhere over the shape */
+.constellation.is-near .constellation-svg {
+  transform: scale(1.03);
+}
+
+.constellation-line {
+  stroke: var(--line);
+  stroke-width: 0.5;
+  transition: stroke 0.5s ease;
+}
+
+.star {
+  fill: var(--star);
+  filter: drop-shadow(0 0 2px var(--star-glow))
+    drop-shadow(0 0 6px var(--star-halo)) drop-shadow(0 0 14px var(--star-halo));
+  animation: twinkle 7s ease-in-out infinite;
+  transition: filter 0.5s ease;
+}
+
+/* the content star: larger, with a warmer glow */
+.star--content {
+  filter: drop-shadow(0 0 2.5px var(--content-glow))
+    drop-shadow(0 0 8px var(--content-glow))
+    drop-shadow(0 0 16px var(--star-halo));
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.star-hit,
+.line-hit {
+  fill: transparent;
+  stroke: transparent;
+  outline: none;
+}
+
+.line-hit {
+  stroke-width: 5;
+}
+
+.star-hit--content {
+  cursor: pointer;
+}
+
+/* soft reaction: gentle brightening when hovering anywhere on the shape */
+.constellation.is-near .constellation-line {
+  stroke: var(--line-soft);
+}
+
+.constellation.is-near .star {
+  filter: drop-shadow(0 0 3px var(--star-glow))
+    drop-shadow(0 0 8px var(--star-halo)) drop-shadow(0 0 18px var(--star-halo));
+}
+
+/* full reaction: the content star itself */
+.constellation.is-hovered .constellation-line {
+  stroke: var(--line-bright);
+}
+
+.constellation.is-hovered .star {
+  filter: drop-shadow(0 0 3px var(--star-glow))
+    drop-shadow(0 0 9px var(--star-halo))
+    drop-shadow(0 0 20px var(--star-halo));
+  opacity: 1;
+  animation-play-state: paused;
+}
+
+.constellation.is-hovered .star--content {
+  filter: drop-shadow(0 0 3px var(--content-glow))
+    drop-shadow(0 0 10px var(--content-glow))
+    drop-shadow(0 0 22px var(--content-glow));
+}
+
+/* hover label above the content star */
+.star-label {
+  position: absolute;
+  transform: translate(-50%, -170%);
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  padding: 0.2rem 0.55rem;
+  border-bottom: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.constellation.is-hovered .star-label {
+  opacity: 1;
+}
+
+/* star-chart name beneath each constellation */
+.constellation-name {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: color 0.4s ease;
+}
+
+.constellation.is-near .constellation-name,
+.constellation.is-hovered .constellation-name {
+  color: var(--ink);
+}
+
+.constellation-name--edit {
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--accent);
+  font: inherit;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-align: center;
+  padding: 0.15rem 0.3rem;
+  width: 12rem;
+  outline: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* gesture trail (drawing the admin star)                              */
+/* ------------------------------------------------------------------ */
+
+.gesture-trail {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.gesture-trail polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.5;
+}
+
+/* ------------------------------------------------------------------ */
+/* content card                                                        */
+/* ------------------------------------------------------------------ */
+
+.card-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--backdrop);
+  backdrop-filter: blur(2px);
+  animation: fade-in 0.25s ease;
+}
+
+.card {
+  position: relative;
+  width: min(26rem, calc(100vw - 3rem));
+  padding: 2rem 2.2rem 2.2rem;
+  background: var(--card-bg);
+  color: var(--ink);
+  border: 1px solid rgba(196, 30, 58, 0.35);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: card-in 0.3s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 2.2rem;
+  width: 2.4rem;
+  height: 2px;
+  background: var(--accent);
+}
+
+.card-date {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.7rem;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.9rem;
+}
+
+.card-description {
+  font-size: 0.87rem;
+  line-height: 1.65;
+  color: var(--ink-dim);
+}
+
+.card-media {
+  margin-bottom: 1rem;
+}
+
+.card-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.card-close:hover,
+.card-close:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* motion + small screens                                              */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .sky::before {
+    animation: none !important;
+  }
+  .star {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .masthead {
+    top: 1.25rem;
+    left: 1.25rem;
+  }
+
+  .theme-toggle {
+    top: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .admin-badge {
+    top: 3.4rem;
+    max-width: calc(100vw - 2rem);
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* constellations are sized in vmin, which gets small on phones — nudge
+     them up so they stay tappable (folded into the JS-driven transform) */
+  .constellation {
+    --m-scale: 1.15;
+  }
+}
