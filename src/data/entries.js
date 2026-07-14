@@ -15,37 +15,14 @@
 //   links        pairs of star indices to connect with lines (the "drawing")
 //   contentStar  index of the star that holds the content, or null to have one
 //                picked at random on each page load
-//   field        where the constellation sits in the sky, as % of the viewport,
-//                plus a size in vmin
+//   field        x = phase on the sky ring (0..145, see lib/sky.js) — spread
+//                entries across the full ring so the cycle has no gap;
+//                y = % of viewport height; size in vmin
 //
 // To plug in real content later: just edit title/description/date/media.
 // The stars/links/field values only affect the shape and placement.
 
 const entries = [
-  {
-    id: "thing-01",
-    title: "Untitled — March 2026",
-    description:
-      "Placeholder description for the first small thing. A few sentences about what it was, why it mattered, or what it felt like to make.",
-    date: "March 2026",
-    media: null,
-    name: null,
-    stars: [
-      { x: 10, y: 70 },
-      { x: 35, y: 40 },
-      { x: 62, y: 55 },
-      { x: 88, y: 25 },
-      { x: 70, y: 85 },
-    ],
-    links: [
-      [0, 1],
-      [1, 2],
-      [2, 3],
-      [2, 4],
-    ],
-    contentStar: null,
-    field: { x: 10, y: 12, size: 38 },
-  },
   {
     id: "thing-02",
     title: "Untitled — January 2026",
@@ -53,7 +30,7 @@ const entries = [
       "Placeholder description. Maybe this one was a sketch done on the back of a receipt, or the first run over five miles.",
     date: "January 2026",
     media: null,
-    name: null,
+    name: "writing",
     stars: [
       { x: 20, y: 20 },
       { x: 55, y: 35 },
@@ -67,7 +44,7 @@ const entries = [
       [3, 0],
     ],
     contentStar: null,
-    field: { x: 58, y: 6, size: 30 },
+    field: { x: 2, y: 54, size: 30 },
   },
   {
     id: "thing-03",
@@ -76,7 +53,7 @@ const entries = [
       "Placeholder description. A shipped feature, a small tool, something that quietly works every day now.",
     date: "November 2025",
     media: null,
-    name: null,
+    name: "software",
     stars: [
       { x: 15, y: 50 },
       { x: 45, y: 25 },
@@ -94,7 +71,7 @@ const entries = [
       [4, 0],
     ],
     contentStar: null,
-    field: { x: 78, y: 26, size: 40 },
+    field: { x: 26, y: 8, size: 40 },
   },
   {
     id: "thing-04",
@@ -103,7 +80,7 @@ const entries = [
       "Placeholder description. A memory more than an artifact — the kind of thing that doesn't photograph well but stays.",
     date: "September 2025",
     media: null,
-    name: null,
+    name: "health",
     stars: [
       { x: 30, y: 15 },
       { x: 70, y: 30 },
@@ -115,7 +92,7 @@ const entries = [
       [2, 0],
     ],
     contentStar: null,
-    field: { x: 26, y: 58, size: 26 },
+    field: { x: 50, y: 60, size: 26 },
   },
   {
     id: "thing-05",
@@ -124,7 +101,7 @@ const entries = [
       "Placeholder description. Something learned, half-finished, abandoned on purpose, or finished and never shown to anyone until now.",
     date: "July 2025",
     media: null,
-    name: null,
+    name: "machine learning",
     stars: [
       { x: 10, y: 30 },
       { x: 40, y: 15 },
@@ -139,7 +116,7 @@ const entries = [
       [3, 4],
     ],
     contentStar: null,
-    field: { x: 60, y: 56, size: 36 },
+    field: { x: 74, y: 18, size: 36 },
   },
   {
     id: "thing-06",
@@ -148,7 +125,7 @@ const entries = [
       "Placeholder description. A workout milestone, a recipe that finally came out right, a small repair.",
     date: "May 2025",
     media: null,
-    name: null,
+    name: "venture",
     stars: [
       { x: 25, y: 75 },
       { x: 45, y: 40 },
@@ -161,7 +138,7 @@ const entries = [
       [2, 3],
     ],
     contentStar: null,
-    field: { x: 5, y: 64, size: 30 },
+    field: { x: 98, y: 58, size: 30 },
   },
   {
     id: "thing-07",
@@ -170,7 +147,7 @@ const entries = [
       "Placeholder description. The kind of small thing that only makes sense next to the others — which is the point of the sky.",
     date: "February 2025",
     media: null,
-    name: null,
+    name: "math & strategy",
     stars: [
       { x: 18, y: 25 },
       { x: 50, y: 12 },
@@ -188,30 +165,7 @@ const entries = [
       [5, 0],
     ],
     contentStar: null,
-    field: { x: 38, y: 26, size: 34 },
-  },
-  {
-    id: "thing-08",
-    title: "Untitled — December 2024",
-    description:
-      "Placeholder description. The oldest star in the sky for now. Everything else drifted in after it.",
-    date: "December 2024",
-    media: null,
-    name: null,
-    stars: [
-      { x: 20, y: 60 },
-      { x: 50, y: 30 },
-      { x: 80, y: 50 },
-      { x: 65, y: 85 },
-    ],
-    links: [
-      [0, 1],
-      [1, 2],
-      [2, 3],
-      [1, 3],
-    ],
-    contentStar: null,
-    field: { x: 82, y: 66, size: 31 },
+    field: { x: 122, y: 14, size: 34 },
   },
 ];
 

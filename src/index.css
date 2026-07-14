@@ -21,14 +21,16 @@
 }
 
 [data-theme="light"] {
-  --bg: #f2ebdd;
+  /* same base as the intro's pearl, so the two sections meet invisibly */
+  --bg: #faf7ef;
   --ink: #292019;
   --ink-dim: rgba(41, 32, 25, 0.5);
-  /* stars stay white in daylight — they read against the cream through glow */
+  /* stars stay white in daylight — pure white glow, no colored outline,
+     so they melt softly into the pearl field */
   --star: #ffffff;
-  --star-glow: rgba(255, 255, 255, 0.95);
-  --star-halo: rgba(196, 30, 58, 0.5);
-  --content-glow: rgba(196, 30, 58, 0.75);
+  --star-glow: rgba(255, 255, 255, 1);
+  --star-halo: rgba(255, 255, 255, 0.75);
+  --content-glow: rgba(255, 235, 220, 0.95);
   --line: rgba(196, 30, 58, 0.45);
   --line-soft: rgba(196, 30, 58, 0.65);
   --line-bright: rgba(196, 30, 58, 0.9);
@@ -45,43 +47,62 @@
   margin: 0;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
 body {
   background: var(--bg);
   color: var(--ink);
   font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
     serif;
-  overflow: hidden;
+  overflow-x: hidden;
+  /* scrolling is JS-assisted; hide the bar to keep the illusion */
+  scrollbar-width: none;
   transition: background 0.6s ease, color 0.6s ease;
 }
 
-.sky {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+body::-webkit-scrollbar {
+  display: none;
 }
 
-/* ---- day: creamy, pearlescent, openly iridescent ------------------ */
+/* ONE background for the whole page, fixed to the viewport — the intro and
+   the sky sit transparently on top of it, so there is no seam anywhere.
+   Day = the white-pearl scheme; night = its dark equivalent. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
 
-[data-theme="light"] .sky {
+[data-theme="light"] body::before {
   background:
-    radial-gradient(100vmax 70vmax at 15% 5%, rgba(255, 190, 215, 0.5), transparent 55%),
-    radial-gradient(90vmax 80vmax at 88% 18%, rgba(180, 212, 255, 0.45), transparent 55%),
-    radial-gradient(85vmax 85vmax at 55% 95%, rgba(255, 228, 160, 0.5), transparent 50%),
-    radial-gradient(70vmax 70vmax at 32% 60%, rgba(196, 245, 220, 0.4), transparent 50%),
-    radial-gradient(60vmax 60vmax at 72% 45%, rgba(225, 195, 255, 0.35), transparent 50%),
+    radial-gradient(80vmax 60vmax at 50% 45%, rgba(255, 255, 255, 0.65), transparent 60%),
+    radial-gradient(70vmax 45vmax at 12% 8%, rgba(255, 196, 222, 0.32), transparent 55%),
+    radial-gradient(65vmax 45vmax at 88% 16%, rgba(184, 214, 255, 0.32), transparent 55%),
+    radial-gradient(60vmax 40vmax at 70% 78%, rgba(255, 236, 175, 0.3), transparent 50%),
+    radial-gradient(55vmax 40vmax at 28% 68%, rgba(220, 200, 255, 0.3), transparent 50%),
     var(--bg);
 }
 
-[data-theme="light"] .sky::before {
+[data-theme="dark"] body::before {
+  background:
+    radial-gradient(100vmax 70vmax at 15% 5%, rgba(22, 62, 150, 0.16), transparent 55%),
+    radial-gradient(90vmax 80vmax at 88% 18%, rgba(10, 115, 140, 0.15), transparent 55%),
+    radial-gradient(85vmax 85vmax at 55% 95%, rgba(14, 115, 72, 0.13), transparent 50%),
+    radial-gradient(70vmax 70vmax at 32% 60%, rgba(30, 95, 170, 0.1), transparent 50%),
+    var(--bg);
+}
+
+/* the slow-turning iridescent sheen, also viewport-fixed, page-wide */
+body::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: -60%;
+  z-index: -1;
+  pointer-events: none;
+  animation: sheen 90s linear infinite;
+}
+
+[data-theme="light"] body::after {
   background: conic-gradient(
     from 0deg,
     rgba(255, 170, 200, 0.22),
@@ -92,36 +113,27 @@ body {
     rgba(255, 170, 200, 0.22)
   );
   filter: blur(50px);
-  animation: sheen 75s linear infinite;
-  pointer-events: none;
 }
 
-/* ---- night: the same iridescence, turned down into the dark ------- */
-
-[data-theme="dark"] .sky {
-  background:
-    radial-gradient(100vmax 70vmax at 15% 5%, rgba(88, 28, 135, 0.16), transparent 55%),
-    radial-gradient(90vmax 80vmax at 88% 18%, rgba(12, 74, 110, 0.16), transparent 55%),
-    radial-gradient(85vmax 85vmax at 55% 95%, rgba(120, 30, 50, 0.14), transparent 50%),
-    radial-gradient(70vmax 70vmax at 32% 60%, rgba(13, 90, 80, 0.1), transparent 50%),
-    var(--bg);
-}
-
-[data-theme="dark"] .sky::before {
-  content: "";
-  position: absolute;
-  inset: -60%;
+[data-theme="dark"] body::after {
   background: conic-gradient(
     from 0deg,
-    rgba(120, 40, 160, 0.1),
-    rgba(20, 90, 140, 0.1),
-    rgba(160, 40, 70, 0.09),
-    rgba(15, 110, 95, 0.08),
-    rgba(120, 40, 160, 0.1)
+    rgba(25, 75, 170, 0.1),
+    rgba(10, 125, 150, 0.1),
+    rgba(16, 120, 80, 0.09),
+    rgba(20, 95, 160, 0.08),
+    rgba(25, 75, 170, 0.1)
   );
   filter: blur(60px);
-  animation: sheen 110s linear infinite;
-  pointer-events: none;
+}
+
+/* the sky is a normal transparent section of the page, one viewport tall,
+   below the intro — you scroll down into it */
+.sky {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 @keyframes sheen {
@@ -136,17 +148,33 @@ body {
 
 .masthead {
   position: absolute;
-  top: 2rem;
-  left: 2.25rem;
+  bottom: 2rem;
+  right: 2.25rem;
   z-index: 5;
-  pointer-events: none;
+  text-align: right;
 }
 
+/* identical treatment to .constellation-name, so the name reads as one more
+   chart label */
 .masthead h1 {
-  font-size: 1.05rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
   color: var(--ink);
+}
+
+/* the name doubles as the (quiet) admin switch */
+.masthead-name {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  /* buttons reset text-transform in UA styles; take the h1's uppercase back */
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
 .masthead h1::after {
@@ -155,7 +183,13 @@ body {
   width: 1.6rem;
   height: 1px;
   margin-top: 0.5rem;
+  margin-left: auto;
   background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.masthead h1:hover::after {
+  width: 3.2rem;
 }
 
 .theme-toggle {
@@ -210,6 +244,9 @@ body {
   /* horizontal position is driven every frame from JS (shared sky scroll)
      as a translate3d; top/width/height come from entry.field */
   will-change: transform;
+  /* the box itself must not swallow events meant for whatever's behind it —
+     only the deliberate hit shapes (and admin controls) are interactive */
+  pointer-events: none;
 }
 
 .constellation-svg {
@@ -227,23 +264,65 @@ body {
 
 .constellation-line {
   stroke: var(--line);
-  stroke-width: 0.5;
+  stroke-width: 0.85;
   transition: stroke 0.5s ease;
 }
 
+/* stars are soft glowing balls: a radial-gradient fill (bright core feathering
+   to nothing — see the svg defs in App) plus a faint bloom */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+#star-ball .ball-core,
+#star-ball-content .ball-core {
+  stop-color: var(--star);
+  stop-opacity: 1;
+}
+
+#star-ball .ball-mid {
+  stop-color: var(--star);
+  stop-opacity: 0.85;
+}
+
+#star-ball .ball-edge {
+  stop-color: var(--star);
+  stop-opacity: 0.25;
+}
+
+#star-ball .ball-out {
+  stop-color: var(--star);
+  stop-opacity: 0;
+}
+
+#star-ball-content .ball-warm-mid {
+  stop-color: var(--content-glow);
+  stop-opacity: 0.85;
+}
+
+#star-ball-content .ball-warm-edge {
+  stop-color: var(--content-glow);
+  stop-opacity: 0.28;
+}
+
+#star-ball-content .ball-warm-out {
+  stop-color: var(--content-glow);
+  stop-opacity: 0;
+}
+
 .star {
-  fill: var(--star);
-  filter: drop-shadow(0 0 2px var(--star-glow))
-    drop-shadow(0 0 6px var(--star-halo)) drop-shadow(0 0 14px var(--star-halo));
+  fill: url(#star-ball);
+  filter: drop-shadow(0 0 4px var(--star-halo));
   animation: twinkle 7s ease-in-out infinite;
   transition: filter 0.5s ease;
 }
 
 /* the content star: larger, with a warmer glow */
 .star--content {
-  filter: drop-shadow(0 0 2.5px var(--content-glow))
-    drop-shadow(0 0 8px var(--content-glow))
-    drop-shadow(0 0 16px var(--star-halo));
+  fill: url(#star-ball-content);
+  filter: drop-shadow(0 0 5px var(--content-glow));
 }
 
 @keyframes twinkle {
@@ -257,14 +336,21 @@ body {
 }
 
 .star-hit,
-.line-hit {
+.line-hit,
+.hull-hit {
   fill: transparent;
   stroke: transparent;
   outline: none;
 }
 
+.star-hit,
+.hull-hit {
+  pointer-events: fill;
+}
+
 .line-hit {
   stroke-width: 5;
+  pointer-events: stroke;
 }
 
 .star-hit--content {
@@ -277,8 +363,8 @@ body {
 }
 
 .constellation.is-near .star {
-  filter: drop-shadow(0 0 3px var(--star-glow))
-    drop-shadow(0 0 8px var(--star-halo)) drop-shadow(0 0 18px var(--star-halo));
+  filter: drop-shadow(0 0 6px var(--star-halo))
+    drop-shadow(0 0 14px var(--star-halo));
 }
 
 /* full reaction: the content star itself */
@@ -287,17 +373,15 @@ body {
 }
 
 .constellation.is-hovered .star {
-  filter: drop-shadow(0 0 3px var(--star-glow))
-    drop-shadow(0 0 9px var(--star-halo))
-    drop-shadow(0 0 20px var(--star-halo));
+  filter: drop-shadow(0 0 7px var(--star-halo))
+    drop-shadow(0 0 16px var(--star-halo));
   opacity: 1;
   animation-play-state: paused;
 }
 
 .constellation.is-hovered .star--content {
-  filter: drop-shadow(0 0 3px var(--content-glow))
-    drop-shadow(0 0 10px var(--content-glow))
-    drop-shadow(0 0 22px var(--content-glow));
+  filter: drop-shadow(0 0 8px var(--content-glow))
+    drop-shadow(0 0 18px var(--content-glow));
 }
 
 /* hover label above the content star */
@@ -321,12 +405,10 @@ body {
   opacity: 1;
 }
 
-/* star-chart name beneath each constellation */
+/* star-chart name scattered somewhere around each constellation
+   (position comes inline from the component, randomized per load) */
 .constellation-name {
   position: absolute;
-  top: calc(100% + 0.3rem);
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 0.62rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -339,6 +421,31 @@ body {
 .constellation.is-near .constellation-name,
 .constellation.is-hovered .constellation-name {
   color: var(--ink);
+}
+
+/* admin: delete control on visitor-drawn constellations */
+.constellation-delete {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  pointer-events: auto;
+  background: none;
+  border: 1px solid rgba(196, 30, 58, 0.5);
+  border-radius: 50%;
+  width: 1.3rem;
+  height: 1.3rem;
+  line-height: 1;
+  font-size: 0.85rem;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.constellation-delete:hover,
+.constellation-delete:focus-visible {
+  background: var(--accent);
+  color: var(--bg);
+  outline: none;
 }
 
 .constellation-name--edit {
@@ -370,13 +477,136 @@ body {
   pointer-events: none;
 }
 
+/* soft glowing trail, like a finger dragged through embers */
 .gesture-trail polyline {
   fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.5;
+  stroke: rgba(196, 30, 58, 0.45);
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.5;
+  filter: blur(1.5px) drop-shadow(0 0 4px rgba(196, 30, 58, 0.7))
+    drop-shadow(0 0 12px rgba(196, 30, 58, 0.4));
+}
+
+/* ------------------------------------------------------------------ */
+/* star-drawing panel (opened by drawing a five-point star)            */
+/* ------------------------------------------------------------------ */
+
+.star-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  background: rgba(6, 5, 4, 0.55);
+  animation: fade-in 0.35s ease;
+  transition: background 0.9s ease;
+}
+
+.star-panel {
+  position: relative;
+  width: min(68vmin, 88vw);
+  aspect-ratio: 1;
+  background: #080606;
+  border: 1px solid rgba(196, 30, 58, 0.4);
+  cursor: crosshair;
+  overflow: hidden;
+  transition: background 0.9s ease, border-color 0.9s ease;
+}
+
+/* six stars set: the pond glows softly — it's ready */
+.star-panel.is-full {
+  animation: panel-bloom 3s ease forwards;
+}
+
+@keyframes panel-bloom {
+  0% {
+    box-shadow: 0 0 0 rgba(196, 30, 58, 0);
+  }
+  40% {
+    box-shadow: 0 0 26px rgba(196, 30, 58, 0.18),
+      inset 0 0 22px rgba(242, 235, 221, 0.04);
+    border-color: rgba(196, 30, 58, 0.65);
+  }
+  100% {
+    box-shadow: 0 0 14px rgba(196, 30, 58, 0.12),
+      inset 0 0 10px rgba(242, 235, 221, 0.025);
+    border-color: rgba(196, 30, 58, 0.55);
+  }
+}
+
+/* dissolve: the panel and backdrop melt away, leaving only the stars */
+.star-panel-backdrop.phase-dissolve,
+.star-panel-backdrop.phase-place {
+  background: transparent;
+  pointer-events: none;
+}
+
+.phase-dissolve .star-panel,
+.phase-place .star-panel {
+  background: transparent;
+  border-color: transparent;
+  overflow: visible;
+}
+
+.star-panel-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+/* place: the freed constellation fades into the screen */
+.phase-place .star-panel-svg {
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.panel-star {
+  fill: url(#panel-star-glow);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: star-pop 0.9s ease;
+}
+
+@keyframes star-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.panel-line {
+  stroke: var(--accent);
+  stroke-width: 0.6;
+  opacity: 0;
+  animation: line-fade 1.1s ease forwards;
+}
+
+@keyframes line-fade {
+  to {
+    opacity: 0.75;
+  }
+}
+
+/* the simulated pond surface (canvas, upscaled) */
+.star-panel-water {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.9s ease;
+}
+
+.phase-dissolve .star-panel-water,
+.phase-place .star-panel-water {
+  opacity: 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -474,11 +704,57 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
+/* landing screen                                                      */
+/* ------------------------------------------------------------------ */
+
+/* the opening view: just the name top-left, transparent over the one shared
+   page background — the sky section sits directly below it */
+.intro {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+/* same face and treatment as the sky masthead, just much larger */
+.intro-name {
+  position: absolute;
+  top: 2rem;
+  left: 2.25rem;
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.intro-name::after {
+  content: "";
+  display: block;
+  width: 5rem;
+  height: 2px;
+  margin-top: 0.9rem;
+  background: var(--accent);
+}
+
+.intro-subtext {
+  position: absolute;
+  right: 22%;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: right;
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  line-height: 1.9;
+  color: var(--ink-dim);
+}
+
+/* ------------------------------------------------------------------ */
 /* motion + small screens                                              */
 /* ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-  .sky::before {
+  body::after {
     animation: none !important;
   }
   .star {
@@ -488,8 +764,18 @@ body {
 
 @media (max-width: 640px) {
   .masthead {
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .intro-name {
     top: 1.25rem;
     left: 1.25rem;
+    font-size: 1.4rem;
+  }
+
+  .intro-subtext {
+    right: 10%;
   }
 
   .theme-toggle {

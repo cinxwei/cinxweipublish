@@ -6,7 +6,6 @@ const STORAGE_KEY = "constellation-names";
 
 const FIRST = [
   "VELA",
-  "LYRA",
   "CORVA",
   "NOCTUA",
   "PYXIS",
