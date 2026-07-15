@@ -514,10 +514,13 @@ body::after {
   aspect-ratio: 749 / 856;
 }
 
-/* the wing drawing, below the name — a touch left of the name's edge */
+/* the wing drawing, below the name — a touch left of the name's edge,
+   pulled up toward the name rather than floating mid-quadrant */
 .intro-wing {
   grid-area: 2 / 1;
   justify-self: start;
+  align-self: start;
+  margin-top: -10vh;
   margin-left: 16vw;
   width: min(40vw, 30rem);
   height: auto;
@@ -540,7 +543,9 @@ body::after {
 
 .intro-subtext {
   grid-area: 2 / 2;
-  /* follows the flower's leftward nudge */
+  /* follows the flower's leftward nudge, raised toward the flower */
+  align-self: start;
+  margin-top: -4vh;
   margin-right: 20vw;
   text-align: right;
   font-family: var(--mono);
