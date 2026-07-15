@@ -403,31 +403,6 @@ body::after {
   color: var(--ink);
 }
 
-/* admin: delete control on visitor-drawn constellations */
-.constellation-delete {
-  position: absolute;
-  top: -0.4rem;
-  right: -0.4rem;
-  pointer-events: auto;
-  background: none;
-  border: 1px solid rgba(196, 30, 58, 0.5);
-  border-radius: 50%;
-  width: 1.3rem;
-  height: 1.3rem;
-  line-height: 1;
-  font-size: 0.85rem;
-  color: var(--accent);
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.constellation-delete:hover,
-.constellation-delete:focus-visible {
-  background: var(--accent);
-  color: var(--bg);
-  outline: none;
-}
-
 .constellation-name--edit {
   pointer-events: auto;
   background: transparent;
@@ -448,130 +423,6 @@ body::after {
 .constellation-name--edit::placeholder {
   color: var(--ink-dim);
   opacity: 0.6;
-}
-
-/* ------------------------------------------------------------------ */
-/* gesture trail (drawing the admin star)                              */
-/* ------------------------------------------------------------------ */
-
-.gesture-trail {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 20;
-  pointer-events: none;
-}
-
-/* soft glowing trail, like a finger dragged through embers */
-.gesture-trail polyline {
-  fill: none;
-  stroke: rgba(196, 30, 58, 0.45);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: blur(1.5px) drop-shadow(0 0 4px rgba(196, 30, 58, 0.7))
-    drop-shadow(0 0 12px rgba(196, 30, 58, 0.4));
-}
-
-/* ------------------------------------------------------------------ */
-/* star-drawing panel (opened by drawing a five-point star)            */
-/* ------------------------------------------------------------------ */
-
-.star-panel-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.1rem;
-  background: rgba(6, 5, 4, 0.55);
-  animation: fade-in 0.35s ease;
-  transition: background 0.9s ease;
-}
-
-.star-panel {
-  position: relative;
-  width: min(68vmin, 88vw);
-  aspect-ratio: 1;
-  background: #080606;
-  border: 1px solid rgba(196, 30, 58, 0.4);
-  cursor: crosshair;
-  overflow: hidden;
-  transition: background 0.9s ease, border-color 0.9s ease;
-}
-
-/* six stars set: the pond glows softly — it's ready */
-.star-panel.is-full {
-  animation: panel-bloom 3s ease forwards;
-}
-
-@keyframes panel-bloom {
-  0% {
-    box-shadow: 0 0 0 rgba(196, 30, 58, 0);
-  }
-  40% {
-    box-shadow: 0 0 26px rgba(196, 30, 58, 0.18),
-      inset 0 0 22px rgba(242, 235, 221, 0.04);
-    border-color: rgba(196, 30, 58, 0.65);
-  }
-  100% {
-    box-shadow: 0 0 14px rgba(196, 30, 58, 0.12),
-      inset 0 0 10px rgba(242, 235, 221, 0.025);
-    border-color: rgba(196, 30, 58, 0.55);
-  }
-}
-
-/* dissolve: the panel and backdrop melt away, leaving only the stars */
-.star-panel-backdrop.phase-dissolve,
-.star-panel-backdrop.phase-place {
-  background: transparent;
-  pointer-events: none;
-}
-
-.phase-dissolve .star-panel,
-.phase-place .star-panel {
-  background: transparent;
-  border-color: transparent;
-  overflow: visible;
-}
-
-.star-panel-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  transition: opacity 1s ease, transform 1s ease;
-}
-
-/* place: the freed constellation fades into the screen */
-.phase-place .star-panel-svg {
-  opacity: 0;
-  transform: scale(0.3);
-}
-
-/* clicked points are marked plainly with a red x */
-.panel-x line {
-  stroke: var(--accent);
-  stroke-width: 0.7;
-  stroke-linecap: round;
-}
-
-.panel-line {
-  stroke: var(--accent);
-  stroke-width: 0.6;
-  opacity: 0;
-  animation: line-fade 1.1s ease forwards;
-}
-
-@keyframes line-fade {
-  to {
-    opacity: 0.75;
-  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -623,12 +474,6 @@ body::after {
 
 .card-media {
   margin-bottom: 1rem;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
 }
 
 /* ------------------------------------------------------------------ */

@@ -17,9 +17,6 @@
 //                entries across the full ring so the cycle has no gap;
 //                y = % of viewport height; size in vmin
 //
-// Visitor-drawn constellations (see StarPanel) still use stars/links point
-// data instead of an image.
-//
 // To edit a poem: just change its `description` string below.
 
 const chart = (n) => `${import.meta.env.BASE_URL}constellations/chart-${n}.png`;

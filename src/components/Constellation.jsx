@@ -32,19 +32,15 @@ function convexHull(points) {
 
 // One constellation = one entry. The whole field scrolls right-to-left in
 // formation along a shallow arc (see lib/sky.js) and wraps around the ring.
-// Preset entries carry a hand-drawn chart (`image`); hovering anywhere on it
-// reacts and clicking opens the card. Entries with `user: true` are
-// visitor-drawn from stars/links: smaller, unnamed, no content star — pure
-// scenery.
+// Entries can carry a hand-drawn chart (`image`); hovering anywhere on it
+// reacts and clicking opens the card.
 export default function Constellation({
   entry,
   name,
   adminMode,
   onRename,
   onOpen,
-  onDelete,
 }) {
-  const isUser = !!entry.user;
   const isImage = !!entry.image;
   const [nearHover, setNearHover] = useState(false); // anywhere on the shape
   const [starHover, setStarHover] = useState(false); // the content star itself
@@ -52,10 +48,10 @@ export default function Constellation({
 
   // Pick the content star once per page load (stable across re-renders).
   const contentIndex = useMemo(() => {
-    if (isUser || isImage) return -1;
+    if (isImage) return -1;
     if (entry.contentStar != null) return entry.contentStar;
     return Math.floor(Math.random() * entry.stars.length);
-  }, [entry, isUser, isImage]);
+  }, [entry, isImage]);
 
   const twinkles = useMemo(
     () => (entry.stars ?? []).map(() => `-${(Math.random() * 6).toFixed(2)}s`),
@@ -111,7 +107,7 @@ export default function Constellation({
     return () => cancelAnimationFrame(raf);
   }, [entry]);
 
-  const contentStar = isUser || isImage ? null : entry.stars[contentIndex];
+  const contentStar = isImage ? null : entry.stars[contentIndex];
 
   const hoverBoth = (on) => {
     setNearHover(on);
@@ -194,10 +190,10 @@ export default function Constellation({
           {/* invisible hit shapes: hovering anywhere on the constellation
               gives the soft reaction; clicking anywhere on it opens the card */}
           <g
-            className={isUser ? undefined : "hit-open"}
+            className="hit-open"
             onMouseEnter={() => setNearHover(true)}
             onMouseLeave={() => setNearHover(false)}
-            onClick={isUser ? undefined : () => onOpen(entry)}
+            onClick={() => onOpen(entry)}
           >
             {hull && (
               <polygon
@@ -227,32 +223,30 @@ export default function Constellation({
                   />
                 )
             )}
-            {!isUser && (
-              <circle
-                className="star-hit star-hit--content"
-                cx={contentStar.x}
-                cy={contentStar.y}
-                r={9}
-                role="button"
-                tabIndex={0}
-                aria-label={`Open: ${entry.title}`}
-                onMouseEnter={() => setStarHover(true)}
-                onMouseLeave={() => setStarHover(false)}
-                onFocus={() => setStarHover(true)}
-                onBlur={() => setStarHover(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onOpen(entry);
-                  }
-                }}
-              />
-            )}
+            <circle
+              className="star-hit star-hit--content"
+              cx={contentStar.x}
+              cy={contentStar.y}
+              r={9}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open: ${entry.title}`}
+              onMouseEnter={() => setStarHover(true)}
+              onMouseLeave={() => setStarHover(false)}
+              onFocus={() => setStarHover(true)}
+              onBlur={() => setStarHover(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onOpen(entry);
+                }
+              }}
+            />
           </g>
         </svg>
       )}
 
-      {!isUser && !isImage && (
+      {!isImage && (
         <div
           className="star-label"
           style={{ left: `${contentStar.x}%`, top: `${contentStar.y}%` }}
@@ -261,37 +255,26 @@ export default function Constellation({
         </div>
       )}
 
-      {isUser && adminMode && (
-        <button
-          className="constellation-delete"
-          onClick={() => onDelete(entry.id)}
-          aria-label="Delete this constellation"
-        >
-          ×
-        </button>
+      {adminMode ? (
+        <input
+          key={name}
+          className="constellation-name constellation-name--edit"
+          style={namePos}
+          defaultValue={name || ""}
+          placeholder="unnamed"
+          onPointerDown={(e) => e.stopPropagation()}
+          onBlur={(e) => onRename(entry.id, e.target.value.trim())}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.target.blur();
+          }}
+        />
+      ) : (
+        name && (
+          <div className="constellation-name" style={namePos}>
+            {name}
+          </div>
+        )
       )}
-
-      {!isUser &&
-        (adminMode ? (
-          <input
-            key={name}
-            className="constellation-name constellation-name--edit"
-            style={namePos}
-            defaultValue={name || ""}
-            placeholder="unnamed"
-            onPointerDown={(e) => e.stopPropagation()}
-            onBlur={(e) => onRename(entry.id, e.target.value.trim())}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.target.blur();
-            }}
-          />
-        ) : (
-          name && (
-            <div className="constellation-name" style={namePos}>
-              {name}
-            </div>
-          )
-        ))}
     </div>
   );
 }

@@ -2,12 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import entries from "./data/entries.js";
 import Constellation from "./components/Constellation.jsx";
 import ContentCard from "./components/ContentCard.jsx";
-import StarPanel from "./components/StarPanel.jsx";
 import IntroAnimation from "./components/IntroAnimation.jsx";
 import { loadNames, saveName } from "./lib/names.js";
-import { isStarGesture } from "./lib/starGesture.js";
 import { nudgeSky, dragSky } from "./lib/sky.js";
-import { placeInField } from "./lib/placement.js";
 
 function initialTheme() {
   const saved = localStorage.getItem("theme");
@@ -22,9 +19,6 @@ export default function App() {
   const [active, setActive] = useState(null);
   const [names, setNames] = useState(() => loadNames(entries));
   const [adminMode, setAdminMode] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [userConstellations, setUserConstellations] = useState([]);
-  const [trail, setTrail] = useState([]);
   const introRef = useRef(null);
 
   // The intro animation waits on its first frame; the first downward scroll
@@ -61,26 +55,6 @@ export default function App() {
   const rename = (id, name) => {
     saveName(id, name);
     setNames((prev) => ({ ...prev, [id]: name }));
-  };
-
-  // Visitor-drawn constellations: smaller and unnamed, dropped at a random
-  // phase on the sky ring to circle with everything else — placed so they
-  // don't overlap the preset constellations (or each other).
-  const addUserConstellation = ({ stars, links }) => {
-    setUserConstellations((prev) => [
-      ...prev,
-      {
-        id: `user-${prev.length}-${Math.random().toString(36).slice(2, 7)}`,
-        user: true,
-        stars,
-        links,
-        field: placeInField(
-          [...entries.map((e) => e.field), ...prev.map((c) => c.field)],
-          10 + Math.random() * 8,
-          { w: window.innerWidth, h: window.innerHeight }
-        ),
-      },
-    ]);
   };
 
   // The page is one document: the pearl intro on top, the sky below it.
@@ -168,8 +142,7 @@ export default function App() {
       }
     };
 
-    const overlayOpen = (target) =>
-      !!target.closest?.(".card-backdrop, .star-panel-backdrop");
+    const overlayOpen = (target) => !!target.closest?.(".card-backdrop");
 
     const onWheel = (e) => {
       // never let the browser scroll natively — a diagonal swipe would slip
@@ -247,7 +220,7 @@ export default function App() {
   // Hold and drag sideways on the sky to spin the constellations past by
   // hand: the field follows the pointer 1:1 while held, and a release
   // flick carries it with inertia. Commits only once the press is clearly
-  // horizontal, so star-drawing and taps are left alone.
+  // horizontal, so taps are left alone.
   const skyDragRef = useRef(false);
   const [skyGrab, setSkyGrab] = useState(false);
   useEffect(() => {
@@ -314,48 +287,6 @@ export default function App() {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", up);
-    };
-  }, []);
-
-  // Draw a five-point star (press, drag the classic single-stroke star,
-  // release) anywhere on the sky to open the star-drawing panel.
-  const drawingRef = useRef(false);
-  useEffect(() => {
-    let pts = [];
-
-    const down = (e) => {
-      if (e.button !== 0) return;
-      if (
-        e.target.closest?.(
-          ".card, .star-panel-backdrop, .intro, input, button"
-        )
-      )
-        return;
-      pts = [{ x: e.clientX, y: e.clientY }];
-      drawingRef.current = true;
-    };
-
-    const move = (e) => {
-      if (!drawingRef.current) return;
-      pts.push({ x: e.clientX, y: e.clientY });
-      if (pts.length > 8 && !skyDragRef.current) setTrail([...pts]);
-    };
-
-    const up = () => {
-      if (!drawingRef.current) return;
-      drawingRef.current = false;
-      if (isStarGesture(pts)) setPanelOpen(true);
-      pts = [];
-      setTrail([]);
-    };
-
-    window.addEventListener("pointerdown", down);
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    return () => {
-      window.removeEventListener("pointerdown", down);
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
     };
   }, []);
 
@@ -440,30 +371,7 @@ export default function App() {
           />
         ))}
 
-        {userConstellations.map((entry) => (
-          <Constellation
-            key={entry.id}
-            entry={entry}
-            adminMode={adminMode}
-            onDelete={(id) =>
-              setUserConstellations((prev) => prev.filter((c) => c.id !== id))
-            }
-          />
-        ))}
       </main>
-
-      {trail.length > 1 && (
-        <svg className="gesture-trail">
-          <polyline points={trail.map((p) => `${p.x},${p.y}`).join(" ")} />
-        </svg>
-      )}
-
-      {panelOpen && (
-        <StarPanel
-          onClose={() => setPanelOpen(false)}
-          onComplete={addUserConstellation}
-        />
-      )}
 
       {active && <ContentCard entry={active} onClose={() => setActive(null)} />}
     </>
