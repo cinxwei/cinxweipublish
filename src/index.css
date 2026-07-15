@@ -652,10 +652,10 @@ body::after {
 .intro-name {
   grid-area: 1 / 1;
   justify-self: start;
-  margin-left: 17vw;
+  margin-left: 21vw;
   font-size: 1.5rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
   color: var(--ink);
 }
 
@@ -663,7 +663,7 @@ body::after {
   grid-area: 1 / 2;
   position: relative;
   /* nudged left of quadrant center */
-  margin-right: 22vw;
+  margin-right: 28vw;
   width: min(13rem, 30vmin);
   /* matches the artwork (749×856) so nothing jumps when it loads */
   aspect-ratio: 749 / 856;
@@ -673,7 +673,7 @@ body::after {
 .intro-wing {
   grid-area: 2 / 1;
   justify-self: start;
-  margin-left: 12vw;
+  margin-left: 16vw;
   width: min(40vw, 30rem);
   height: auto;
   max-height: 42vh;
@@ -696,7 +696,7 @@ body::after {
 .intro-subtext {
   grid-area: 2 / 2;
   /* follows the flower's leftward nudge */
-  margin-right: 14vw;
+  margin-right: 20vw;
   text-align: right;
   font-family: var(--mono);
   font-size: 0.7rem;
@@ -726,18 +726,18 @@ body::after {
   }
 
   .intro-name {
-    margin-left: 6vw;
+    margin-left: 9vw;
     font-size: 1.1rem;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.14em;
   }
 
   .intro-anim {
-    margin-right: 6vw;
+    margin-right: 10vw;
     width: min(9rem, 38vmin);
   }
 
   .intro-wing {
-    margin-left: 6vw;
+    margin-left: 9vw;
     width: min(40vw, 18rem);
     max-height: 34vh;
   }
