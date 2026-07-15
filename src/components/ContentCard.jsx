@@ -22,10 +22,7 @@ export default function ContentCard({ entry, onClose }) {
         aria-label={entry.title}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="card-close" onClick={onClose} aria-label="Close">
-          ×
-        </button>
-        <p className="card-date">{entry.date}</p>
+        {entry.date && <p className="card-date">{entry.date}</p>}
         <h2 className="card-title">{entry.title}</h2>
         {entry.media && (
           <div className="card-media">

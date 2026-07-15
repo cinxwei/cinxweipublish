@@ -5,10 +5,13 @@
 :root {
   --accent: #c41e3a;
 
-  /* dark (night) — default */
-  --bg: #120f0e;
-  --ink: #f2ebdd;
-  --ink-dim: rgba(242, 235, 221, 0.45);
+  /* the caption layer — same face as everything else */
+  --mono: Arial, Helvetica, sans-serif;
+
+  /* dark (night) — charcoal paper, cool and neutral */
+  --bg: #17181a;
+  --ink: #e6e4dd;
+  --ink-dim: rgba(230, 228, 221, 0.45);
   --star: #fdfaf2;
   --star-glow: rgba(253, 250, 242, 0.9);
   --star-halo: rgba(242, 235, 221, 0.4);
@@ -16,17 +19,17 @@
   --line: rgba(196, 30, 58, 0.4);
   --line-soft: rgba(196, 30, 58, 0.6);
   --line-bright: rgba(196, 30, 58, 0.85);
-  --card-bg: #181413;
-  --backdrop: rgba(10, 8, 7, 0.6);
+  --card-bg: #1e2023;
+  --backdrop: rgba(11, 12, 14, 0.6);
 }
 
 [data-theme="light"] {
-  /* same base as the intro's pearl, so the two sections meet invisibly */
-  --bg: #faf7ef;
-  --ink: #292019;
-  --ink-dim: rgba(41, 32, 25, 0.5);
+  /* bone paper — one flat sheet, like an anatomical plate */
+  --bg: #f2ede2;
+  --ink: #26211a;
+  --ink-dim: rgba(38, 33, 26, 0.5);
   /* stars stay white in daylight — pure white glow, no colored outline,
-     so they melt softly into the pearl field */
+     so they melt softly into the paper */
   --star: #ffffff;
   --star-glow: rgba(255, 255, 255, 1);
   --star-halo: rgba(255, 255, 255, 0.75);
@@ -34,8 +37,8 @@
   --line: rgba(196, 30, 58, 0.45);
   --line-soft: rgba(196, 30, 58, 0.65);
   --line-bright: rgba(196, 30, 58, 0.9);
-  --card-bg: #faf5ea;
-  --backdrop: rgba(242, 235, 221, 0.55);
+  --card-bg: #f6f1e6;
+  --backdrop: rgba(242, 237, 226, 0.55);
 }
 
 /* ------------------------------------------------------------------ */
@@ -50,8 +53,7 @@
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
-    serif;
+  font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   /* scrolling is JS-assisted; hide the bar to keep the illusion */
   scrollbar-width: none;
@@ -64,7 +66,8 @@ body::-webkit-scrollbar {
 
 /* ONE background for the whole page, fixed to the viewport — the intro and
    the sky sit transparently on top of it, so there is no seam anywhere.
-   Day = the white-pearl scheme; night = its dark equivalent. */
+   Day = bone paper; night = charcoal paper. One flat sheet, no hue-shifting:
+   just a faint center lift and darkened edges, like a plate under a lamp. */
 body::before {
   content: "";
   position: fixed;
@@ -75,56 +78,34 @@ body::before {
 
 [data-theme="light"] body::before {
   background:
-    radial-gradient(80vmax 60vmax at 50% 45%, rgba(255, 255, 255, 0.65), transparent 60%),
-    radial-gradient(70vmax 45vmax at 12% 8%, rgba(255, 196, 222, 0.32), transparent 55%),
-    radial-gradient(65vmax 45vmax at 88% 16%, rgba(184, 214, 255, 0.32), transparent 55%),
-    radial-gradient(60vmax 40vmax at 70% 78%, rgba(255, 236, 175, 0.3), transparent 50%),
-    radial-gradient(55vmax 40vmax at 28% 68%, rgba(220, 200, 255, 0.3), transparent 50%),
+    radial-gradient(120vmax 90vmax at 50% 40%, rgba(255, 255, 255, 0.35), transparent 62%),
+    radial-gradient(140vmax 110vmax at 50% 50%, transparent 58%, rgba(62, 48, 32, 0.09) 100%),
     var(--bg);
 }
 
 [data-theme="dark"] body::before {
   background:
-    radial-gradient(100vmax 70vmax at 15% 5%, rgba(22, 62, 150, 0.16), transparent 55%),
-    radial-gradient(90vmax 80vmax at 88% 18%, rgba(10, 115, 140, 0.15), transparent 55%),
-    radial-gradient(85vmax 85vmax at 55% 95%, rgba(14, 115, 72, 0.13), transparent 50%),
-    radial-gradient(70vmax 70vmax at 32% 60%, rgba(30, 95, 170, 0.1), transparent 50%),
+    radial-gradient(120vmax 90vmax at 50% 40%, rgba(226, 232, 240, 0.04), transparent 62%),
+    radial-gradient(140vmax 110vmax at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.4) 100%),
     var(--bg);
 }
 
-/* the slow-turning iridescent sheen, also viewport-fixed, page-wide */
+/* paper grain, viewport-fixed — the tooth of the sheet */
 body::after {
   content: "";
   position: fixed;
-  inset: -60%;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
-  animation: sheen 90s linear infinite;
-}
-
-[data-theme="light"] body::after {
-  background: conic-gradient(
-    from 0deg,
-    rgba(255, 170, 200, 0.22),
-    rgba(170, 205, 255, 0.22),
-    rgba(255, 230, 150, 0.22),
-    rgba(180, 245, 210, 0.18),
-    rgba(215, 180, 255, 0.2),
-    rgba(255, 170, 200, 0.22)
-  );
-  filter: blur(50px);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="240" height="240" filter="url(%23n)"/></svg>');
+  background-size: 240px 240px;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
 }
 
 [data-theme="dark"] body::after {
-  background: conic-gradient(
-    from 0deg,
-    rgba(25, 75, 170, 0.1),
-    rgba(10, 125, 150, 0.1),
-    rgba(16, 120, 80, 0.09),
-    rgba(20, 95, 160, 0.08),
-    rgba(25, 75, 170, 0.1)
-  );
-  filter: blur(60px);
+  opacity: 0.05;
+  mix-blend-mode: screen;
 }
 
 /* the sky is a normal transparent section of the page, one viewport tall,
@@ -134,12 +115,9 @@ body::after {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-}
-
-@keyframes sheen {
-  to {
-    transform: rotate(360deg);
-  }
+  /* the sky can be grabbed and spun sideways; keep drags from
+     selecting stray label text */
+  user-select: none;
 }
 
 /* ------------------------------------------------------------------ */
@@ -157,10 +135,10 @@ body::after {
 /* identical treatment to .constellation-name, so the name reads as one more
    chart label */
 .masthead h1 {
+  font-family: var(--mono);
   font-size: 0.62rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
+  letter-spacing: 0.24em;
   color: var(--ink);
 }
 
@@ -177,21 +155,6 @@ body::after {
   cursor: pointer;
 }
 
-.masthead h1::after {
-  content: "";
-  display: block;
-  width: 1.6rem;
-  height: 1px;
-  margin-top: 0.5rem;
-  margin-left: auto;
-  background: var(--accent);
-  transition: width 0.3s ease;
-}
-
-.masthead h1:hover::after {
-  width: 3.2rem;
-}
-
 .theme-toggle {
   position: absolute;
   top: 2rem;
@@ -201,8 +164,9 @@ body::after {
   border: none;
   padding: 0.3rem 0.1rem;
   font: inherit;
-  font-size: 0.75rem;
-  letter-spacing: 0.22em;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-dim);
   cursor: pointer;
@@ -223,13 +187,12 @@ body::after {
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
-  font-size: 0.68rem;
-  font-style: italic;
+  font-family: var(--mono);
+  font-size: 0.64rem;
   letter-spacing: 0.08em;
   color: var(--ink-dim);
   padding: 0.3rem 0.8rem;
   border: 1px solid rgba(196, 30, 58, 0.4);
-  border-radius: 2rem;
   background: color-mix(in srgb, var(--bg) 70%, transparent);
   pointer-events: none;
   white-space: nowrap;
@@ -266,6 +229,19 @@ body::after {
   stroke: var(--line);
   stroke-width: 0.85;
   transition: stroke 0.5s ease;
+}
+
+/* hand-drawn chart image (preset constellations) */
+.constellation-img {
+  opacity: 1;
+  filter: saturate(1.45) contrast(1.12);
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+.constellation.is-near .constellation-img,
+.constellation.is-hovered .constellation-img {
+  filter: saturate(1.6) contrast(1.15)
+    drop-shadow(0 0 7px rgba(196, 30, 58, 0.45));
 }
 
 /* stars are soft glowing balls: a radial-gradient fill (bright core feathering
@@ -353,7 +329,10 @@ body::after {
   pointer-events: stroke;
 }
 
-.star-hit--content {
+.star-hit--content,
+.hit-open .star-hit,
+.hit-open .line-hit,
+.hit-open .hull-hit {
   cursor: pointer;
 }
 
@@ -389,9 +368,9 @@ body::after {
   position: absolute;
   transform: translate(-50%, -170%);
   white-space: nowrap;
-  font-size: 0.72rem;
-  font-style: italic;
-  letter-spacing: 0.05em;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
   color: var(--ink);
   padding: 0.2rem 0.55rem;
   border-bottom: 1px solid var(--accent);
@@ -409,8 +388,9 @@ body::after {
    (position comes inline from the component, randomized per load) */
 .constellation-name {
   position: absolute;
+  font-family: var(--mono);
   font-size: 0.62rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--ink-dim);
   white-space: nowrap;
@@ -454,14 +434,20 @@ body::after {
   border: none;
   border-bottom: 1px solid var(--accent);
   font: inherit;
+  font-family: var(--mono);
   font-size: 0.62rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--ink);
   text-align: center;
   padding: 0.15rem 0.3rem;
   width: 12rem;
   outline: none;
+}
+
+.constellation-name--edit::placeholder {
+  color: var(--ink-dim);
+  opacity: 0.6;
 }
 
 /* ------------------------------------------------------------------ */
@@ -568,18 +554,11 @@ body::after {
   transform: scale(0.3);
 }
 
-.panel-star {
-  fill: url(#panel-star-glow);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: star-pop 0.9s ease;
-}
-
-@keyframes star-pop {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
+/* clicked points are marked plainly with a red x */
+.panel-x line {
+  stroke: var(--accent);
+  stroke-width: 0.7;
+  stroke-linecap: round;
 }
 
 .panel-line {
@@ -595,20 +574,6 @@ body::after {
   }
 }
 
-/* the simulated pond surface (canvas, upscaled) */
-.star-panel-water {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.9s ease;
-}
-
-.phase-dissolve .star-panel-water,
-.phase-place .star-panel-water {
-  opacity: 0;
-}
-
 /* ------------------------------------------------------------------ */
 /* content card                                                        */
 /* ------------------------------------------------------------------ */
@@ -622,33 +587,21 @@ body::after {
   justify-content: center;
   background: var(--backdrop);
   backdrop-filter: blur(2px);
-  animation: fade-in 0.25s ease;
 }
 
 .card {
   position: relative;
-  width: min(26rem, calc(100vw - 3rem));
+  width: min(38rem, calc(100vw - 3rem));
   padding: 2rem 2.2rem 2.2rem;
   background: var(--card-bg);
   color: var(--ink);
   border: 1px solid rgba(196, 30, 58, 0.35);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 20px 60px rgba(0, 0, 0, 0.35);
-  animation: card-in 0.3s ease;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 2.2rem;
-  width: 2.4rem;
-  height: 2px;
-  background: var(--accent);
 }
 
 .card-date {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 0.7rem;
@@ -665,29 +618,11 @@ body::after {
   font-size: 0.87rem;
   line-height: 1.65;
   color: var(--ink-dim);
+  white-space: pre-line; /* poems keep their line breaks */
 }
 
 .card-media {
   margin-bottom: 1rem;
-}
-
-.card-close {
-  position: absolute;
-  top: 0.7rem;
-  right: 0.9rem;
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  color: var(--ink-dim);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.card-close:hover,
-.card-close:focus-visible {
-  color: var(--accent);
-  outline: none;
 }
 
 @keyframes fade-in {
@@ -696,56 +631,77 @@ body::after {
   }
 }
 
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-}
-
 /* ------------------------------------------------------------------ */
 /* landing screen                                                      */
 /* ------------------------------------------------------------------ */
 
-/* the opening view: just the name top-left, transparent over the one shared
-   page background — the sky section sits directly below it */
+/* the opening view: four quadrants over the one shared page background —
+   name / animation on top, wing / greeting below; the sky sits under it */
 .intro {
   position: relative;
   width: 100%;
   height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  place-items: center;
+  padding: 2rem;
 }
 
 /* same face and treatment as the sky masthead, just much larger */
 .intro-name {
-  position: absolute;
-  top: 2rem;
-  left: 2.25rem;
-  font-size: 2.1rem;
+  grid-area: 1 / 1;
+  justify-self: start;
+  margin-left: 17vw;
+  font-size: 1.5rem;
   font-weight: 400;
   letter-spacing: 0.3em;
-  text-transform: uppercase;
   color: var(--ink);
 }
 
-.intro-name::after {
-  content: "";
+.intro-anim {
+  grid-area: 1 / 2;
+  position: relative;
+  /* nudged left of quadrant center */
+  margin-right: 22vw;
+  width: min(13rem, 30vmin);
+  /* matches the artwork (749×856) so nothing jumps when it loads */
+  aspect-ratio: 749 / 856;
+}
+
+/* the wing drawing, below the name — a touch left of the name's edge */
+.intro-wing {
+  grid-area: 2 / 1;
+  justify-self: start;
+  margin-left: 12vw;
+  width: min(40vw, 30rem);
+  height: auto;
+  max-height: 42vh;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.intro-anim canvas,
+.intro-anim img {
   display: block;
-  width: 5rem;
-  height: 2px;
-  margin-top: 0.9rem;
-  background: var(--accent);
+  width: 100%;
+  height: 100%;
+}
+
+.intro-anim img {
+  position: absolute;
+  inset: 0;
 }
 
 .intro-subtext {
-  position: absolute;
-  right: 22%;
-  top: 50%;
-  transform: translateY(-50%);
+  grid-area: 2 / 2;
+  /* follows the flower's leftward nudge */
+  margin-right: 14vw;
   text-align: right;
-  font-size: 0.78rem;
-  font-style: italic;
-  letter-spacing: 0.06em;
-  line-height: 1.9;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  line-height: 2;
   color: var(--ink-dim);
 }
 
@@ -754,9 +710,6 @@ body::after {
 /* ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-  body::after {
-    animation: none !important;
-  }
   .star {
     animation: none;
   }
@@ -768,14 +721,25 @@ body::after {
     right: 1.25rem;
   }
 
-  .intro-name {
-    top: 1.25rem;
-    left: 1.25rem;
-    font-size: 1.4rem;
+  .intro {
+    padding: 1.25rem;
   }
 
-  .intro-subtext {
-    right: 10%;
+  .intro-name {
+    margin-left: 6vw;
+    font-size: 1.1rem;
+    letter-spacing: 0.22em;
+  }
+
+  .intro-anim {
+    margin-right: 6vw;
+    width: min(9rem, 38vmin);
+  }
+
+  .intro-wing {
+    margin-left: 6vw;
+    width: min(40vw, 18rem);
+    max-height: 34vh;
   }
 
   .theme-toggle {

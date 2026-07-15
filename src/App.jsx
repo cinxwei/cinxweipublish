@@ -3,9 +3,11 @@ import entries from "./data/entries.js";
 import Constellation from "./components/Constellation.jsx";
 import ContentCard from "./components/ContentCard.jsx";
 import StarPanel from "./components/StarPanel.jsx";
+import IntroAnimation from "./components/IntroAnimation.jsx";
 import { loadNames, saveName } from "./lib/names.js";
 import { isStarGesture } from "./lib/starGesture.js";
-import { WRAP_SPAN, WRAP_MIN, nudgeSky } from "./lib/sky.js";
+import { nudgeSky, dragSky } from "./lib/sky.js";
+import { placeInField } from "./lib/placement.js";
 
 function initialTheme() {
   const saved = localStorage.getItem("theme");
@@ -25,6 +27,32 @@ export default function App() {
   const [trail, setTrail] = useState([]);
   const introRef = useRef(null);
 
+  // The intro animation waits on its first frame; the first downward scroll
+  // wakes it instead of moving the page, and when it finishes one pass the
+  // page is carried down to the sky.
+  const [introAnim, setIntroAnim] = useState("idle"); // idle → playing → done
+  const introAnimRef = useRef(introAnim);
+  introAnimRef.current = introAnim;
+  const autoScrollRef = useRef(false);
+
+  const introAnimDone = () => {
+    setIntroAnim("done");
+    autoScrollRef.current = true;
+    const target = introRef.current?.offsetHeight ?? window.innerHeight;
+    const start = window.scrollY;
+    const t0 = performance.now();
+    const D = 1300;
+    // eases away from rest, then keeps gathering speed all the way down
+    const ease = (t) => Math.pow(t, 2.2);
+    const step = (now) => {
+      const t = Math.min((now - t0) / D, 1);
+      window.scrollTo(0, start + (target - start) * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+      else autoScrollRef.current = false;
+    };
+    requestAnimationFrame(step);
+  };
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("theme", theme);
@@ -36,7 +64,8 @@ export default function App() {
   };
 
   // Visitor-drawn constellations: smaller and unnamed, dropped at a random
-  // phase on the sky ring to circle with everything else.
+  // phase on the sky ring to circle with everything else — placed so they
+  // don't overlap the preset constellations (or each other).
   const addUserConstellation = ({ stars, links }) => {
     setUserConstellations((prev) => [
       ...prev,
@@ -45,11 +74,11 @@ export default function App() {
         user: true,
         stars,
         links,
-        field: {
-          x: WRAP_MIN + Math.random() * WRAP_SPAN,
-          y: 10 + Math.random() * 60,
-          size: 10 + Math.random() * 8,
-        },
+        field: placeInField(
+          [...entries.map((e) => e.field), ...prev.map((c) => c.field)],
+          10 + Math.random() * 8,
+          { w: window.innerWidth, h: window.innerHeight }
+        ),
       },
     ]);
   };
@@ -115,8 +144,14 @@ export default function App() {
     };
 
     const push = (d, amount) => {
+      if (autoScrollRef.current) return; // the animation is carrying us down
       const st = skyTop();
       const pos = window.scrollY;
+      if (d === 1 && pos <= 1 && introAnimRef.current !== "done") {
+        // first scroll at the intro plays the animation instead of the page
+        if (introAnimRef.current === "idle") setIntroAnim("playing");
+        return;
+      }
       if (dir === 0) {
         if (d === 1 && pos >= st - 2) return; // already at the sky
         if (d === -1 && pos <= 1) return; // already at the top
@@ -137,18 +172,35 @@ export default function App() {
       !!target.closest?.(".card-backdrop, .star-panel-backdrop");
 
     const onWheel = (e) => {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal → sky nudge
+      // never let the browser scroll natively — a diagonal swipe would slip
+      // its vertical component past the assist (and the intro gate)
       e.preventDefault();
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal → sky nudge
       if (overlayOpen(e.target)) return;
       push(e.deltaY > 0 ? 1 : -1, Math.abs(e.deltaY) * 4);
     };
 
+    // backstop: whatever the input path, the page stays parked at the intro
+    // until the animation has finished
+    const onScroll = () => {
+      if (autoScrollRef.current || dir !== 0) return;
+      if (introAnimRef.current !== "done" && window.scrollY > 0) {
+        window.scrollTo(0, 0);
+      }
+    };
+
     const onKey = (e) => {
       if (e.target.closest?.("input")) return;
-      if (["ArrowDown", "PageDown"].includes(e.key)) {
+      if (
+        ["ArrowDown", "PageDown", "End"].includes(e.key) ||
+        (e.key === " " && !e.shiftKey)
+      ) {
         e.preventDefault();
         push(1, 500);
-      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+      } else if (
+        ["ArrowUp", "PageUp", "Home"].includes(e.key) ||
+        (e.key === " " && e.shiftKey)
+      ) {
         e.preventDefault();
         push(-1, 500);
       }
@@ -162,6 +214,7 @@ export default function App() {
       const dy = touchY - e.touches[0].clientY;
       touchY = e.touches[0].clientY;
       if (overlayOpen(e.target)) return;
+      if (skyDragRef.current) return; // finger is spinning the sky
       if (dy !== 0) {
         e.preventDefault();
         push(dy > 0 ? 1 : -1, Math.abs(dy) * 8);
@@ -172,12 +225,14 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("scroll", onScroll);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
@@ -187,6 +242,79 @@ export default function App() {
     const onWheel = (e) => nudgeSky(e.deltaX * 0.04);
     window.addEventListener("wheel", onWheel, { passive: true });
     return () => window.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Hold and drag sideways on the sky to spin the constellations past by
+  // hand: the field follows the pointer 1:1 while held, and a release
+  // flick carries it with inertia. Commits only once the press is clearly
+  // horizontal, so star-drawing and taps are left alone.
+  const skyDragRef = useRef(false);
+  const [skyGrab, setSkyGrab] = useState(false);
+  useEffect(() => {
+    let startX = null;
+    let startY = null;
+    let lastX = 0;
+    let lastT = 0;
+    let velX = 0; // smoothed px/s
+    let tracking = false;
+
+    const down = (e) => {
+      if (e.button !== 0) return;
+      if (!e.target.closest?.(".sky")) return;
+      if (e.target.closest?.("button, input")) return;
+      tracking = true;
+      startX = lastX = e.clientX;
+      startY = e.clientY;
+      lastT = performance.now();
+      velX = 0;
+    };
+
+    const move = (e) => {
+      if (!tracking) return;
+      if (!skyDragRef.current) {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.hypot(dx, dy) < 12) return;
+        if (Math.abs(dx) <= Math.abs(dy) * 1.2) {
+          tracking = false; // moving vertically — not a grab
+          return;
+        }
+        skyDragRef.current = true;
+        setSkyGrab(true);
+        lastX = e.clientX;
+        lastT = performance.now();
+        return;
+      }
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      const dt = Math.max(now - lastT, 1) / 1000;
+      lastX = e.clientX;
+      lastT = now;
+      // constellations sit at field.x - skyPos, so moving them with the
+      // pointer means moving the clock the opposite way
+      dragSky((-dx / window.innerWidth) * 100);
+      velX = 0.75 * velX + 0.25 * (dx / dt);
+    };
+
+    const up = () => {
+      if (skyDragRef.current) {
+        nudgeSky((-velX / window.innerWidth) * 100 * 0.5);
+      }
+      tracking = false;
+      skyDragRef.current = false;
+      setSkyGrab(false);
+    };
+
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
   }, []);
 
   // Draw a five-point star (press, drag the classic single-stroke star,
@@ -210,7 +338,7 @@ export default function App() {
     const move = (e) => {
       if (!drawingRef.current) return;
       pts.push({ x: e.clientX, y: e.clientY });
-      if (pts.length > 8) setTrail([...pts]);
+      if (pts.length > 8 && !skyDragRef.current) setTrail([...pts]);
     };
 
     const up = () => {
@@ -252,16 +380,28 @@ export default function App() {
         </defs>
       </svg>
 
+      {/* four quadrants: name / animation on top, wing / greeting below */}
       <section className="intro" ref={introRef}>
-        <h1 className="intro-name">cindy wei</h1>
+        <h1 className="intro-name">Cindy Wei</h1>
+        <IntroAnimation
+          playing={introAnim === "playing"}
+          onDone={introAnimDone}
+        />
+        <img
+          className="intro-wing"
+          src={`${import.meta.env.BASE_URL}wing.png`}
+          alt=""
+        />
         <p className="intro-subtext">
-          Currently working on software @ Imbue.
+          Currently working on software at Imbue.
           <br />
-          It&rsquo;s nice to meet you.
+          It&rsquo;s nice to meet you!
+          <br />
+          @cinxwei
         </p>
       </section>
 
-      <main className="sky">
+      <main className={`sky${skyGrab ? " is-grabbing" : ""}`}>
         <header className="masthead">
           <h1>
             <button
@@ -269,7 +409,7 @@ export default function App() {
               onClick={() => setAdminMode((a) => !a)}
               aria-pressed={adminMode}
             >
-              cindy wei
+              Cindy Wei
             </button>
           </h1>
         </header>

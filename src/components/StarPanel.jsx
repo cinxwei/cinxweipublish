@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import RippleWater from "./RippleWater.jsx";
 
 const MAX_STARS = 6;
 
@@ -29,16 +28,15 @@ function randomLinks(stars) {
 }
 
 // Hidden feature: drawing a five-point star on the sky opens this black
-// panel — a still pond. Click to set stars (each drop ripples the water);
-// pressing Enter connects them into a constellation and releases it into
-// the sky. Clicking outside slips away.
+// panel. Click to mark stars (each shows as a red x); pressing Enter
+// connects them into a constellation and releases it into the sky.
+// Clicking outside slips away.
 // Phases: draw → connect (lines fade in) → dissolve (panel fades away)
 // → place (the constellation itself fades into the screen).
 export default function StarPanel({ onClose, onComplete }) {
   const [stars, setStars] = useState([]);
   const [links, setLinks] = useState([]);
   const [phase, setPhase] = useState("draw");
-  const waterRef = useRef(null);
   const timersRef = useRef([]);
 
   useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
@@ -48,7 +46,6 @@ export default function StarPanel({ onClose, onComplete }) {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    waterRef.current?.disturb(x, y); // the pond always answers a touch
     if (stars.length >= MAX_STARS) return;
     setStars((s) => [...s, { x, y }]);
   };
@@ -88,22 +85,11 @@ export default function StarPanel({ onClose, onComplete }) {
           addStar(e);
         }}
       >
-        <RippleWater ref={waterRef} className="star-panel-water" />
         <svg
           viewBox="0 0 100 100"
           className="star-panel-svg"
           preserveAspectRatio="none"
         >
-          <defs>
-            {/* soft-edged glowing orb for placed stars */}
-            <radialGradient id="panel-star-glow">
-              <stop offset="0%" stopColor="#fffdf6" stopOpacity="1" />
-              <stop offset="12%" stopColor="#fdf8ec" stopOpacity="0.85" />
-              <stop offset="34%" stopColor="#f6edd9" stopOpacity="0.3" />
-              <stop offset="62%" stopColor="#f6edd9" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#f6edd9" stopOpacity="0" />
-            </radialGradient>
-          </defs>
           {phase !== "draw" &&
             links.map(([a, b], i) => (
               <line
@@ -117,7 +103,10 @@ export default function StarPanel({ onClose, onComplete }) {
               />
             ))}
           {stars.map((s, i) => (
-            <circle key={i} className="panel-star" cx={s.x} cy={s.y} r={4.4} />
+            <g key={i} className="panel-x">
+              <line x1={s.x - 1.6} y1={s.y - 1.6} x2={s.x + 1.6} y2={s.y + 1.6} />
+              <line x1={s.x - 1.6} y1={s.y + 1.6} x2={s.x + 1.6} y2={s.y - 1.6} />
+            </g>
           ))}
         </svg>
       </div>

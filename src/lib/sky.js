@@ -42,3 +42,9 @@ export function skyPos(now) {
 export function nudgeSky(amount) {
   vel += amount;
 }
+
+// Direct grab: move the sky by a fixed distance right now (no velocity),
+// used while a pointer drag is holding it.
+export function dragSky(amount) {
+  extra += amount;
+}
