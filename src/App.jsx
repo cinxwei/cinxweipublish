@@ -15,12 +15,18 @@ function initialTheme() {
 const currentRoute = () => window.location.hash.replace(/^#\/?/, "");
 
 export default function App() {
-  const [theme, setTheme] = useState(initialTheme);
+  // no toggle for now — the theme just follows the last saved choice or
+  // the system preference
+  const [theme] = useState(initialTheme);
   const [route, setRoute] = useState(currentRoute);
 
-  // The flower animation waits on its first frame; the first scroll wakes
-  // it. Scrolling itself is native — the page just moves on by.
-  const [introAnim, setIntroAnim] = useState("idle"); // idle → playing → done
+  // The flower animation waits on its first frame; the first scroll intent
+  // wakes it instead of moving the page, and the page stays parked at the
+  // intro until the animation has finished. (Arriving directly at the
+  // #index permalink skips the wait.)
+  const [introAnim, setIntroAnim] = useState(() =>
+    window.location.hash === "#index" ? "done" : "idle"
+  ); // idle → playing → done
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -44,28 +50,50 @@ export default function App() {
   const entry = entries.find((e) => e.id === route);
 
   useEffect(() => {
-    if (introAnim !== "idle" || entry) return;
-    const wake = () => setIntroAnim("playing");
-    window.addEventListener("scroll", wake, { once: true, passive: true });
-    window.addEventListener("wheel", wake, { once: true, passive: true });
-    window.addEventListener("touchmove", wake, { once: true, passive: true });
+    if (introAnim === "done" || entry) return;
+    const wake = () =>
+      setIntroAnim((s) => (s === "idle" ? "playing" : s));
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (e.deltaY > 0) wake();
+    };
+    const onTouchMove = (e) => {
+      e.preventDefault();
+      wake();
+    };
+    const onKey = (e) => {
+      if (e.target.closest?.("input, textarea")) return;
+      if (
+        ["ArrowDown", "PageDown", "End", "ArrowUp", "PageUp", "Home"].includes(
+          e.key
+        ) ||
+        e.key === " "
+      ) {
+        e.preventDefault();
+        if (["ArrowDown", "PageDown", "End", " "].includes(e.key)) wake();
+      }
+    };
+    // backstop: whatever the input path (scrollbar drag, find-in-page...),
+    // the page stays parked at the intro
+    const onScroll = () => {
+      if (window.scrollY > 0) window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll);
     return () => {
-      window.removeEventListener("scroll", wake);
-      window.removeEventListener("wheel", wake);
-      window.removeEventListener("touchmove", wake);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll);
     };
   }, [introAnim, entry]);
 
   return (
     <>
-      <button
-        className="theme-toggle"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      >
-        {theme === "dark" ? "[ night ]" : "[ day ]"}
-      </button>
-
       {entry ? (
         <EntryPage entry={entry} />
       ) : (

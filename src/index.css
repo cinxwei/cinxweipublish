@@ -83,36 +83,6 @@ body::after {
 }
 
 /* ------------------------------------------------------------------ */
-/* theme toggle — fixed, so it rides along on every page               */
-/* ------------------------------------------------------------------ */
-
-.theme-toggle {
-  position: fixed;
-  top: 2rem;
-  right: 2.25rem;
-  z-index: 5;
-  background: none;
-  border: none;
-  padding: 0.3rem 0.1rem;
-  font: inherit;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  cursor: pointer;
-  border-bottom: 1px solid transparent;
-  transition: color 0.25s ease, border-color 0.25s ease;
-}
-
-.theme-toggle:hover,
-.theme-toggle:focus-visible {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-  outline: none;
-}
-
-/* ------------------------------------------------------------------ */
 /* landing screen                                                      */
 /* ------------------------------------------------------------------ */
 
@@ -138,7 +108,7 @@ body::after {
   font-weight: 700;
   letter-spacing: 0.05em;
   /* softer than the shared ink — dark grey, not black */
-  color: #4a4642;
+  color: #5c5850;
 }
 
 [data-theme="dark"] .intro-name {
@@ -203,8 +173,8 @@ body::after {
 /* ------------------------------------------------------------------ */
 
 .index {
-  min-height: 60vh;
-  padding: 14vh 21vw 20vh;
+  min-height: 100vh;
+  padding: 14vh 2rem 45vh;
 }
 
 .entry-list {
@@ -253,8 +223,10 @@ body::after {
 }
 
 .entry-back {
-  display: inline-block;
-  margin-bottom: 3rem;
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 5;
   font-family: var(--mono);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
@@ -277,7 +249,7 @@ body::after {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #4a4642;
+  color: #5c5850;
   margin-bottom: 0.9rem;
 }
 
@@ -327,13 +299,13 @@ body::after {
     max-height: 34vh;
   }
 
-  .theme-toggle {
-    top: 1.25rem;
-    right: 1.25rem;
+  .index {
+    padding: 12vh 1.25rem 40vh;
   }
 
-  .index {
-    padding: 12vh 9vw 18vh;
+  .entry-back {
+    top: 1.25rem;
+    left: 1.25rem;
   }
 
   .entry-page {
