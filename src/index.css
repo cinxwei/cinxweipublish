@@ -498,17 +498,24 @@ body::after {
   grid-area: 1 / 1;
   justify-self: start;
   margin-left: 21vw;
-  font-size: 1.5rem;
-  font-weight: 400;
-  letter-spacing: 0.18em;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  /* softer than the shared ink — dark grey, not black */
+  color: #4a4642;
+}
+
+[data-theme="dark"] .intro-name {
   color: var(--ink);
 }
 
 .intro-anim {
   grid-area: 1 / 2;
   position: relative;
-  /* nudged left of quadrant center */
+  /* nudged left of quadrant center, and a touch down */
   margin-right: 28vw;
+  margin-top: 6vh;
   width: min(13rem, 30vmin);
   /* matches the artwork (749×856) so nothing jumps when it loads */
   aspect-ratio: 749 / 856;
@@ -521,11 +528,12 @@ body::after {
   justify-self: start;
   align-self: start;
   margin-top: -10vh;
-  margin-left: 16vw;
+  margin-left: 19vw;
   width: min(40vw, 30rem);
   height: auto;
   max-height: 42vh;
   object-fit: contain;
+  transform: rotate(15deg);
   pointer-events: none;
 }
 
@@ -545,8 +553,8 @@ body::after {
   grid-area: 2 / 2;
   /* follows the flower's leftward nudge, raised toward the flower */
   align-self: start;
-  margin-top: -4vh;
-  margin-right: 20vw;
+  margin-top: 0vh;
+  margin-right: 26vw;
   text-align: right;
   font-family: var(--mono);
   font-size: 0.7rem;
