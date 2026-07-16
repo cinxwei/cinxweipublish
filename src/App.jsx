@@ -26,7 +26,7 @@ export default function App() {
   // #index permalink skips the wait.)
   const [introAnim, setIntroAnim] = useState(() =>
     window.location.hash === "#index" ? "done" : "idle"
-  ); // idle → playing → done
+  ); // idle → playing → settling → done
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -50,7 +50,7 @@ export default function App() {
   const entry = entries.find((e) => e.id === route);
 
   useEffect(() => {
-    if (introAnim === "done" || entry) return;
+    if (introAnim === "done" || introAnim === "settling" || entry) return;
     const wake = () =>
       setIntroAnim((s) => (s === "idle" ? "playing" : s));
 
@@ -92,6 +92,35 @@ export default function App() {
     };
   }, [introAnim, entry]);
 
+  // Right after the animation finishes, any wheel momentum the visitor built
+  // up while waiting would yank the page. Ease scrolling back in instead:
+  // for a moment, wheel deltas land scaled by a curve that ramps to full.
+  useEffect(() => {
+    if (introAnim !== "settling" || entry) return;
+    const T = 1400; // ms until scroll is back at full speed
+    const t0 = performance.now();
+    let released = false;
+
+    const onWheel = (e) => {
+      if (released) return;
+      const t = (performance.now() - t0) / T;
+      if (t >= 1) {
+        released = true;
+        return;
+      }
+      e.preventDefault();
+      const ease = 0.15 + 0.85 * t * t; // gentle at first, full by T
+      window.scrollBy(0, e.deltaY * ease);
+    };
+
+    const timer = setTimeout(() => setIntroAnim("done"), T);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("wheel", onWheel);
+    };
+  }, [introAnim, entry]);
+
   return (
     <>
       {entry ? (
@@ -103,7 +132,7 @@ export default function App() {
             <h1 className="intro-name">Cindy Wei</h1>
             <IntroAnimation
               playing={introAnim === "playing"}
-              onDone={() => setIntroAnim("done")}
+              onDone={() => setIntroAnim("settling")}
             />
             <img
               className="intro-wing"
