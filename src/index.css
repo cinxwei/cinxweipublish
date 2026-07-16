@@ -148,7 +148,7 @@ body::after {
 .intro-subtext::after {
   content: "";
   position: absolute;
-  right: -0.5cm;
+  right: -1.5cm;
   top: -8vh; /* reaches up to about the flower stem's foot */
   height: 34vh; /* ...and down to the intro's bottom quarter */
   width: 2px;
