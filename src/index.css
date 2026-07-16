@@ -142,20 +142,20 @@ body::after {
   pointer-events: none;
 }
 
-/* decorative line down the right margin — same grey as the name, anchored
-   to the page (it scrolls away with the intro), a touch outside the
-   flower/greeting column */
-.intro::after {
+/* decorative line down the right margin — same grey as the name, hung off
+   the greeting so it stays with the flower/subtext column at any window
+   size; anchored to the page (it scrolls away with the intro) */
+.intro-subtext::after {
   content: "";
   position: absolute;
-  right: calc(26vw - 1cm);
-  top: 41vh;
-  bottom: 25vh;
+  right: -0.5cm;
+  top: -8vh; /* reaches up to about the flower stem's foot */
+  height: 34vh; /* ...and down to the intro's bottom quarter */
   width: 2px;
   background: #5c5850;
 }
 
-[data-theme="dark"] .intro::after {
+[data-theme="dark"] .intro-subtext::after {
   background: var(--ink);
 }
 
@@ -173,6 +173,7 @@ body::after {
 
 .intro-subtext {
   grid-area: 2 / 2;
+  position: relative; /* anchors the decorative line */
   /* follows the flower's leftward nudge, raised toward the flower */
   align-self: start;
   margin-top: 0vh;
