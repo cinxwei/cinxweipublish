@@ -12,15 +12,6 @@
   --bg: #17181a;
   --ink: #e6e4dd;
   --ink-dim: rgba(230, 228, 221, 0.45);
-  --star: #fdfaf2;
-  --star-glow: rgba(253, 250, 242, 0.9);
-  --star-halo: rgba(242, 235, 221, 0.4);
-  --content-glow: rgba(255, 200, 150, 0.9);
-  --line: rgba(196, 30, 58, 0.4);
-  --line-soft: rgba(196, 30, 58, 0.6);
-  --line-bright: rgba(196, 30, 58, 0.85);
-  --card-bg: #1e2023;
-  --backdrop: rgba(11, 12, 14, 0.6);
 }
 
 [data-theme="light"] {
@@ -28,17 +19,6 @@
   --bg: #f2ede2;
   --ink: #26211a;
   --ink-dim: rgba(38, 33, 26, 0.5);
-  /* stars stay white in daylight — pure white glow, no colored outline,
-     so they melt softly into the paper */
-  --star: #ffffff;
-  --star-glow: rgba(255, 255, 255, 1);
-  --star-halo: rgba(255, 255, 255, 0.75);
-  --content-glow: rgba(255, 235, 220, 0.95);
-  --line: rgba(196, 30, 58, 0.45);
-  --line-soft: rgba(196, 30, 58, 0.65);
-  --line-bright: rgba(196, 30, 58, 0.9);
-  --card-bg: #f6f1e6;
-  --backdrop: rgba(242, 237, 226, 0.55);
 }
 
 /* ------------------------------------------------------------------ */
@@ -55,17 +35,11 @@ body {
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
-  /* scrolling is JS-assisted; hide the bar to keep the illusion */
-  scrollbar-width: none;
   transition: background 0.6s ease, color 0.6s ease;
 }
 
-body::-webkit-scrollbar {
-  display: none;
-}
-
-/* ONE background for the whole page, fixed to the viewport — the intro and
-   the sky sit transparently on top of it, so there is no seam anywhere.
+/* ONE background for the whole page, fixed to the viewport — every section
+   sits transparently on top of it, so there is no seam anywhere.
    Day = bone paper; night = charcoal paper. One flat sheet, no hue-shifting:
    just a faint center lift and darkened edges, like a plate under a lamp. */
 body::before {
@@ -108,55 +82,12 @@ body::after {
   mix-blend-mode: screen;
 }
 
-/* the sky is a normal transparent section of the page, one viewport tall,
-   below the intro — you scroll down into it */
-.sky {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  /* the sky can be grabbed and spun sideways; keep drags from
-     selecting stray label text */
-  user-select: none;
-}
-
 /* ------------------------------------------------------------------ */
-/* masthead + theme toggle + admin                                     */
+/* theme toggle — fixed, so it rides along on every page               */
 /* ------------------------------------------------------------------ */
-
-.masthead {
-  position: absolute;
-  bottom: 2rem;
-  right: 2.25rem;
-  z-index: 5;
-  text-align: right;
-}
-
-/* identical treatment to .constellation-name, so the name reads as one more
-   chart label */
-.masthead h1 {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  font-weight: 400;
-  letter-spacing: 0.24em;
-  color: var(--ink);
-}
-
-/* the name doubles as the (quiet) admin switch */
-.masthead-name {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  letter-spacing: inherit;
-  /* buttons reset text-transform in UA styles; take the h1's uppercase back */
-  text-transform: inherit;
-  color: inherit;
-  cursor: pointer;
-}
 
 .theme-toggle {
-  position: absolute;
+  position: fixed;
   top: 2rem;
   right: 2.25rem;
   z-index: 5;
@@ -181,307 +112,12 @@ body::after {
   outline: none;
 }
 
-.admin-badge {
-  position: absolute;
-  top: 2.1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  font-family: var(--mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.08em;
-  color: var(--ink-dim);
-  padding: 0.3rem 0.8rem;
-  border: 1px solid rgba(196, 30, 58, 0.4);
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* ------------------------------------------------------------------ */
-/* constellations                                                      */
-/* ------------------------------------------------------------------ */
-
-.constellation {
-  position: absolute;
-  /* horizontal position is driven every frame from JS (shared sky scroll)
-     as a translate3d; top/width/height come from entry.field */
-  will-change: transform;
-  /* the box itself must not swallow events meant for whatever's behind it —
-     only the deliberate hit shapes (and admin controls) are interactive */
-  pointer-events: none;
-}
-
-.constellation-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  display: block;
-  transition: transform 0.7s ease;
-}
-
-/* soft reaction when the cursor passes anywhere over the shape */
-.constellation.is-near .constellation-svg {
-  transform: scale(1.03);
-}
-
-.constellation-line {
-  stroke: var(--line);
-  stroke-width: 0.85;
-  transition: stroke 0.5s ease;
-}
-
-/* hand-drawn chart image (preset constellations) */
-.constellation-img {
-  opacity: 1;
-  filter: saturate(1.45) contrast(1.12);
-  transition: opacity 0.5s ease, filter 0.5s ease;
-}
-
-.constellation.is-near .constellation-img,
-.constellation.is-hovered .constellation-img {
-  filter: saturate(1.6) contrast(1.15)
-    drop-shadow(0 0 7px rgba(196, 30, 58, 0.45));
-}
-
-/* stars are soft glowing balls: a radial-gradient fill (bright core feathering
-   to nothing — see the svg defs in App) plus a faint bloom */
-.svg-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
-#star-ball .ball-core,
-#star-ball-content .ball-core {
-  stop-color: var(--star);
-  stop-opacity: 1;
-}
-
-#star-ball .ball-mid {
-  stop-color: var(--star);
-  stop-opacity: 0.85;
-}
-
-#star-ball .ball-edge {
-  stop-color: var(--star);
-  stop-opacity: 0.25;
-}
-
-#star-ball .ball-out {
-  stop-color: var(--star);
-  stop-opacity: 0;
-}
-
-#star-ball-content .ball-warm-mid {
-  stop-color: var(--content-glow);
-  stop-opacity: 0.85;
-}
-
-#star-ball-content .ball-warm-edge {
-  stop-color: var(--content-glow);
-  stop-opacity: 0.28;
-}
-
-#star-ball-content .ball-warm-out {
-  stop-color: var(--content-glow);
-  stop-opacity: 0;
-}
-
-.star {
-  fill: url(#star-ball);
-  filter: drop-shadow(0 0 4px var(--star-halo));
-  animation: twinkle 7s ease-in-out infinite;
-  transition: filter 0.5s ease;
-}
-
-/* the content star: larger, with a warmer glow */
-.star--content {
-  fill: url(#star-ball-content);
-  filter: drop-shadow(0 0 5px var(--content-glow));
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.star-hit,
-.line-hit,
-.hull-hit {
-  fill: transparent;
-  stroke: transparent;
-  outline: none;
-}
-
-.star-hit,
-.hull-hit {
-  pointer-events: fill;
-}
-
-.line-hit {
-  stroke-width: 5;
-  pointer-events: stroke;
-}
-
-.star-hit--content,
-.hit-open .star-hit,
-.hit-open .line-hit,
-.hit-open .hull-hit {
-  cursor: pointer;
-}
-
-/* soft reaction: gentle brightening when hovering anywhere on the shape */
-.constellation.is-near .constellation-line {
-  stroke: var(--line-soft);
-}
-
-.constellation.is-near .star {
-  filter: drop-shadow(0 0 6px var(--star-halo))
-    drop-shadow(0 0 14px var(--star-halo));
-}
-
-/* full reaction: the content star itself */
-.constellation.is-hovered .constellation-line {
-  stroke: var(--line-bright);
-}
-
-.constellation.is-hovered .star {
-  filter: drop-shadow(0 0 7px var(--star-halo))
-    drop-shadow(0 0 16px var(--star-halo));
-  opacity: 1;
-  animation-play-state: paused;
-}
-
-.constellation.is-hovered .star--content {
-  filter: drop-shadow(0 0 8px var(--content-glow))
-    drop-shadow(0 0 18px var(--content-glow));
-}
-
-/* hover label above the content star */
-.star-label {
-  position: absolute;
-  transform: translate(-50%, -170%);
-  white-space: nowrap;
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.1em;
-  color: var(--ink);
-  padding: 0.2rem 0.55rem;
-  border-bottom: 1px solid var(--accent);
-  background: color-mix(in srgb, var(--bg) 78%, transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.constellation.is-hovered .star-label {
-  opacity: 1;
-}
-
-/* star-chart name scattered somewhere around each constellation
-   (position comes inline from the component, randomized per load) */
-.constellation-name {
-  position: absolute;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  white-space: nowrap;
-  pointer-events: none;
-  transition: color 0.4s ease;
-}
-
-.constellation.is-near .constellation-name,
-.constellation.is-hovered .constellation-name {
-  color: var(--ink);
-}
-
-.constellation-name--edit {
-  pointer-events: auto;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--accent);
-  font: inherit;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink);
-  text-align: center;
-  padding: 0.15rem 0.3rem;
-  width: 12rem;
-  outline: none;
-}
-
-.constellation-name--edit::placeholder {
-  color: var(--ink-dim);
-  opacity: 0.6;
-}
-
-/* ------------------------------------------------------------------ */
-/* content card                                                        */
-/* ------------------------------------------------------------------ */
-
-.card-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--backdrop);
-  backdrop-filter: blur(2px);
-}
-
-.card {
-  position: relative;
-  width: min(38rem, calc(100vw - 3rem));
-  padding: 2rem 2.2rem 2.2rem;
-  background: var(--card-bg);
-  color: var(--ink);
-  border: 1px solid rgba(196, 30, 58, 0.35);
-}
-
-.card-date {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.7rem;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  margin-bottom: 0.9rem;
-}
-
-.card-description {
-  font-size: 0.87rem;
-  line-height: 1.65;
-  color: var(--ink-dim);
-  white-space: pre-line; /* poems keep their line breaks */
-}
-
-.card-media {
-  margin-bottom: 1rem;
-}
-
 /* ------------------------------------------------------------------ */
 /* landing screen                                                      */
 /* ------------------------------------------------------------------ */
 
 /* the opening view: four quadrants over the one shared page background —
-   name / animation on top, wing / greeting below; the sky sits under it */
+   name / animation on top, wing / greeting below; the index sits under it */
 .intro {
   position: relative;
   width: 100%;
@@ -493,7 +129,6 @@ body::after {
   padding: 2rem;
 }
 
-/* same face and treatment as the sky masthead, just much larger */
 .intro-name {
   grid-area: 1 / 1;
   justify-self: start;
@@ -564,21 +199,113 @@ body::after {
 }
 
 /* ------------------------------------------------------------------ */
-/* motion + small screens                                              */
+/* the index — about me + posts, below the fold                        */
 /* ------------------------------------------------------------------ */
 
-@media (prefers-reduced-motion: reduce) {
-  .star {
-    animation: none;
-  }
+.index {
+  min-height: 60vh;
+  padding: 14vh 21vw 20vh;
 }
 
-@media (max-width: 640px) {
-  .masthead {
-    bottom: 1.25rem;
-    right: 1.25rem;
-  }
+.entry-list {
+  list-style: none;
+  padding: 0;
+}
 
+.entry-list li {
+  margin-bottom: 1.4rem;
+}
+
+/* plain old links: quiet grey, red on hover */
+.entry-link {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  text-decoration-thickness: 1px;
+  transition: color 0.25s ease;
+}
+
+.entry-link:hover,
+.entry-link:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.entry-list-date {
+  margin-left: 1rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+}
+
+/* ------------------------------------------------------------------ */
+/* entry page — one post (or about me) on its own sheet                */
+/* ------------------------------------------------------------------ */
+
+.entry-page {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 18vh 1.5rem 20vh;
+}
+
+.entry-back {
+  display: inline-block;
+  margin-bottom: 3rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.entry-back:hover,
+.entry-back:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+
+.entry-title {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #4a4642;
+  margin-bottom: 0.9rem;
+}
+
+[data-theme="dark"] .entry-title {
+  color: var(--ink);
+}
+
+.entry-date {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.4rem;
+}
+
+.entry-body {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: var(--ink-dim);
+  white-space: pre-line; /* poems keep their line breaks */
+}
+
+/* ------------------------------------------------------------------ */
+/* small screens                                                       */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
   .intro {
     padding: 1.25rem;
   }
@@ -605,16 +332,11 @@ body::after {
     right: 1.25rem;
   }
 
-  .admin-badge {
-    top: 3.4rem;
-    max-width: calc(100vw - 2rem);
-    white-space: normal;
-    text-align: center;
+  .index {
+    padding: 12vh 9vw 18vh;
   }
 
-  /* constellations are sized in vmin, which gets small on phones — nudge
-     them up so they stay tappable (folded into the JS-driven transform) */
-  .constellation {
-    --m-scale: 1.15;
+  .entry-page {
+    padding: 14vh 1.5rem 16vh;
   }
 }
