@@ -142,6 +142,23 @@ body::after {
   pointer-events: none;
 }
 
+/* decorative line down the right margin — same grey as the name, anchored
+   to the page (it scrolls away with the intro), a touch outside the
+   flower/greeting column */
+.intro::after {
+  content: "";
+  position: absolute;
+  right: calc(26vw - 1cm);
+  top: 41vh;
+  bottom: 25vh;
+  width: 2px;
+  background: #5c5850;
+}
+
+[data-theme="dark"] .intro::after {
+  background: var(--ink);
+}
+
 .intro-anim canvas,
 .intro-anim img {
   display: block;
@@ -174,7 +191,7 @@ body::after {
 
 .index {
   min-height: 100vh;
-  padding: 14vh 2rem 45vh;
+  padding: 14vh 21vw 45vh;
 }
 
 .entry-list {
@@ -300,7 +317,7 @@ body::after {
   }
 
   .index {
-    padding: 12vh 1.25rem 40vh;
+    padding: 12vh 9vw 40vh;
   }
 
   .entry-back {
