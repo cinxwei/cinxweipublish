@@ -8,6 +8,13 @@
   /* the caption layer — same face as everything else */
   --mono: Arial, Helvetica, sans-serif;
 
+  /* the central content band shared by the intro and the index, so both
+     halves line up and stay centred at any width. Everything is expressed
+     in fluid, clamped units so it scales down cleanly to phones. */
+  --band-left: clamp(9rem, 26vw, 17rem); /* name / greeting / wing column */
+  --band-right: clamp(6.5rem, 20vw, 15rem); /* flower / links column */
+  --band-gap: clamp(0.75rem, 2vw, 2rem);
+
   /* dark (night) — charcoal paper, cool and neutral */
   --bg: #17181a;
   --ink: #e6e4dd;
@@ -86,25 +93,30 @@ body::after {
 /* landing screen                                                      */
 /* ------------------------------------------------------------------ */
 
-/* the opening view: four quadrants over the one shared page background —
-   name / animation on top, wing / greeting below; the index sits under it */
+/* the opening view: the name + greeting and the flower sit side by side in
+   a centred band (1fr spacers on either side keep it centred at any width);
+   the index sits under it, sharing the same band columns so the two halves
+   line up. */
 .intro {
   position: relative;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  place-items: center;
+  grid-template-columns: 1fr var(--band-left) var(--band-right) 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--band-gap);
+  align-content: center;
   padding: 2rem;
 }
 
 .intro-name {
-  grid-area: 1 / 1;
+  grid-column: 2;
+  grid-row: 1;
   justify-self: start;
-  margin-left: 21vw;
+  align-self: end;
+  white-space: nowrap;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 2.5rem;
+  font-size: clamp(1.4rem, 4vw, 2.5rem);
   font-weight: 700;
   letter-spacing: 0.05em;
   /* softer than the shared ink — dark grey, not black */
@@ -116,46 +128,31 @@ body::after {
 }
 
 .intro-anim {
-  grid-area: 1 / 2;
+  /* fills the right band column and sits vertically centred beside the name */
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
   position: relative;
-  /* nudged left of quadrant center, and a touch down */
-  margin-right: 28vw;
-  margin-top: 6vh;
-  width: min(13rem, 30vmin);
+  width: 100%;
   /* matches the artwork (749×856) so nothing jumps when it loads */
   aspect-ratio: 749 / 856;
 }
 
-/* the wing drawing, below the name — a touch left of the name's edge,
-   pulled up toward the name rather than floating mid-quadrant */
-.intro-wing {
-  grid-area: 2 / 1;
-  justify-self: start;
-  align-self: start;
-  margin-top: -10vh;
-  margin-left: 19vw;
-  width: min(40vw, 30rem);
-  height: auto;
-  max-height: 42vh;
-  object-fit: contain;
-  transform: rotate(15deg);
-  pointer-events: none;
-}
-
-/* decorative line down the right margin — same grey as the name, hung off
-   the greeting so it stays with the flower/subtext column at any window
-   size; anchored to the page (it scrolls away with the intro) */
-.intro-subtext::after {
+/* decorative line, hugging the flower's right edge — same grey as the name,
+   vertically centred on the flower; the offset is a fraction of the flower so
+   it tracks its right edge as the band scales */
+.intro-anim::after {
   content: "";
   position: absolute;
-  right: -1.5cm;
-  top: -8vh; /* reaches up to about the flower stem's foot */
-  height: 34vh; /* ...and down to the intro's bottom quarter */
+  right: -6%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28vh;
   width: 2px;
   background: #5c5850;
 }
 
-[data-theme="dark"] .intro-subtext::after {
+[data-theme="dark"] .intro-anim::after {
   background: var(--ink);
 }
 
@@ -172,13 +169,13 @@ body::after {
 }
 
 .intro-subtext {
-  grid-area: 2 / 2;
-  position: relative; /* anchors the decorative line */
-  /* follows the flower's leftward nudge, raised toward the flower */
+  grid-column: 2;
+  grid-row: 2;
+  /* stacked directly under the name, sharing its left edge */
+  justify-self: start;
   align-self: start;
-  margin-top: 0vh;
-  margin-right: 26vw;
-  text-align: right;
+  margin-top: 1.5rem;
+  text-align: left;
   font-family: var(--mono);
   font-size: 0.7rem;
   letter-spacing: 0.05em;
@@ -190,14 +187,40 @@ body::after {
 /* the index — about me + posts, below the fold                        */
 /* ------------------------------------------------------------------ */
 
+/* the index shares the intro's band columns, so the links land in the same
+   column as the flower and the wing under the name column */
 .index {
   min-height: 100vh;
-  padding: 14vh 21vw 45vh;
+  display: grid;
+  grid-template-columns: 1fr var(--band-left) var(--band-right) 1fr;
+  grid-template-rows: auto 1fr auto;
+  column-gap: var(--band-gap);
+  padding: 14vh 2rem 12vh;
 }
 
 .entry-list {
+  grid-column: 3;
+  grid-row: 1;
   list-style: none;
   padding: 0;
+  /* links live on the right side, right edge under the flower's line */
+  text-align: right;
+  padding-right: 12%;
+}
+
+/* the wing drawing — low on the left, under the name column, matching the
+   flower's leftward-nudged counterpart above */
+.intro-wing {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+  align-self: end;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  object-fit: contain;
+  transform: rotate(15deg);
+  pointer-events: none;
 }
 
 .entry-list li {
@@ -288,37 +311,40 @@ body::after {
   font-size: 0.92rem;
   line-height: 1.8;
   color: var(--ink-dim);
-  white-space: pre-line; /* poems keep their line breaks */
+  white-space: pre-line; /* line breaks are preserved */
+}
+
+.entry-body-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  transition: color 0.25s ease;
+}
+
+.entry-body-link:hover,
+.entry-body-link:focus-visible {
+  color: var(--accent);
+  outline: none;
 }
 
 /* ------------------------------------------------------------------ */
 /* small screens                                                       */
 /* ------------------------------------------------------------------ */
 
+/* The band is fully fluid (clamped vw units), so it already scales down; the
+   phone tweaks are just tighter page padding and a hair more letter-spacing
+   on the shrunken name. */
 @media (max-width: 640px) {
   .intro {
-    padding: 1.25rem;
+    padding: 1.5rem;
   }
 
   .intro-name {
-    margin-left: 9vw;
-    font-size: 1.1rem;
-    letter-spacing: 0.14em;
-  }
-
-  .intro-anim {
-    margin-right: 10vw;
-    width: min(9rem, 38vmin);
-  }
-
-  .intro-wing {
-    margin-left: 9vw;
-    width: min(40vw, 18rem);
-    max-height: 34vh;
+    letter-spacing: 0.1em;
   }
 
   .index {
-    padding: 12vh 9vw 40vh;
+    padding: 12vh 1.5rem 12vh;
   }
 
   .entry-back {

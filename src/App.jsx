@@ -27,6 +27,9 @@ export default function App() {
   const [introAnim, setIntroAnim] = useState(() =>
     window.location.hash === "#index" ? "done" : "idle"
   ); // idle → playing → settling → done
+  // bumped each time the intro is re-armed, so the flower remounts fresh
+  // (back to its first frame) and can play from the top again
+  const [replayKey, setReplayKey] = useState(0);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -121,24 +124,35 @@ export default function App() {
     };
   }, [introAnim, entry]);
 
+  // Once the animation has finished, scrolling all the way back up to the
+  // landing re-arms it: the next downward scroll plays it again from the top.
+  // (We only re-arm after the visitor has actually scrolled down first, so
+  // the moment the animation ends doesn't instantly trap the page at the top.)
+  useEffect(() => {
+    if (introAnim !== "done" || entry) return;
+    let wentDown = false;
+    const onScroll = () => {
+      if (window.scrollY > window.innerHeight * 0.5) {
+        wentDown = true;
+      } else if (window.scrollY === 0 && wentDown) {
+        wentDown = false;
+        setReplayKey((k) => k + 1);
+        setIntroAnim("idle");
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [introAnim, entry]);
+
   return (
     <>
       {entry ? (
         <EntryPage entry={entry} />
       ) : (
         <main>
-          {/* four quadrants: name / animation on top, wing / greeting below */}
+          {/* name + greeting stacked on the left, flower centered on the right */}
           <section className="intro">
             <h1 className="intro-name">Cindy Wei</h1>
-            <IntroAnimation
-              playing={introAnim === "playing"}
-              onDone={() => setIntroAnim("settling")}
-            />
-            <img
-              className="intro-wing"
-              src={`${import.meta.env.BASE_URL}wing.png`}
-              alt=""
-            />
             <p className="intro-subtext">
               Currently working on software at Imbue.
               <br />
@@ -146,9 +160,14 @@ export default function App() {
               <br />
               @cinxwei
             </p>
+            <IntroAnimation
+              key={replayKey}
+              playing={introAnim === "playing"}
+              onDone={() => setIntroAnim("settling")}
+            />
           </section>
 
-          {/* below the fold: everything else, as a plain list of links */}
+          {/* below the fold: the links on the right, the wing low on the left */}
           <section className="index" id="index">
             <ul className="entry-list">
               {entries.map((e) => (
@@ -160,6 +179,11 @@ export default function App() {
                 </li>
               ))}
             </ul>
+            <img
+              className="intro-wing"
+              src={`${import.meta.env.BASE_URL}wing.png`}
+              alt=""
+            />
           </section>
         </main>
       )}
