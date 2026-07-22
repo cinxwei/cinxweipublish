@@ -22,7 +22,17 @@ Reach out if you'd like to talk or get to know https://mitcap.vc/`,
   {
     id: "disgusting-transparency",
     title: "disgusting transparency",
-    description: ``,
+    description: `Hobbies are generative- they create things, capabilities, memories or a renewed mind.
+We have invented activities which are not.
+A star example is a gambling addiction: a mathematically literal negative-sum game.
+A recent example is the transformation of information absorption to algorithmic black holes. We have invented a form of reading that teaches you nothing and only reinforces what you know.
+We do not question enough the hours spent everyday consuming media that is unaligned with what we want to learn and who we want to become.
+These stagnant black boxes for the mind are wrapped in simulated curiosity.
+Instead of just limiting the time we spend, the underlying mechanism must change.
+In both the Apple and Google app stores, popular gambling games are required to publish their exact expected percentages to prevent addiction. So why is the way we consume media allowed to be served in a way that is not treated similarly? Content is withheld, drawn one-by-one at random, like a person pulling rabbits out of a hat.
+When we can replace this illusion with disgusting transparency, addiction fades.
+Addiction is non-generative, good obsession is.
+There is a highly robust form of beauty in disgusting transparency, the same that emerges when you take apart a computer to observe the traces and pins. It is the same beauty that emerges in the blood-sweat of a ballerina’s shoes. It is the same beauty that is caught by a glimpse into the kitchen-full of viscera and laboring hands behind a fine-dining dish.`,
     date: "",
   },
 ];
